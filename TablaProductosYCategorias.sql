@@ -1,6 +1,7 @@
 CREATE TABLE Categorias (
     idCategoria INT PRIMARY KEY AUTO_INCREMENT,
     nombre VARCHAR(255) NOT NULL
+);
 
 CREATE TABLE Productos (
     idProducto INT PRIMARY KEY AUTO_INCREMENT,
