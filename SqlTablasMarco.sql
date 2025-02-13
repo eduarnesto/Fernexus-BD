@@ -10,7 +10,7 @@ CREATE TABLE PedidosProductos (
     Cantidad INT,
     PRIMARY KEY (IdPedido, IdProducto),
 	CONSTRAINT FKPedidosProductosPedido FOREIGN KEY (IdPedido) REFERENCES Pedidos(IdPedido),
-    CONSTRAINT FKPedidosProductosProducto FOREIGN KEY (IdProducto) REFERENCES Productos(IdProducto)
+    CONSTRAINT FKPedidosProductosProducto FOREIGN KEY (IdProducto) REFERENCES Productos(IdProducto) 
 );CREATE TABLE ProductosCategorias (
     IdCategoria INT,
     IdProducto INT,
