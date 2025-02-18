@@ -1,5 +1,12 @@
-Create database Fernexus
-Use Fernexus
+CREATE TABLE ProductosCategorias (
+    IdCategoria INT,
+    IdProducto INT,
+    CONSTRAINT PK_ProductosCategorias PRIMARY KEY (IdCategoria, IdProducto),
+    CONSTRAINT FK_ProductosCategorias_Categoria FOREIGN KEY (IdCategoria) 
+        REFERENCES Categorias(IdCategoria),
+    CONSTRAINT FK_ProductosCategorias_Producto FOREIGN KEY (IdProducto) 
+        REFERENCES Productos(IdProducto)
+);
 
 CREATE TABLE Pedidos (
     IdPedido INT IDENTITY(1,1),
@@ -35,14 +42,12 @@ CREATE TABLE Categorias (
 CREATE TABLE PedidosProductos (
     IdPedido INT,
     IdProducto INT,
-    Cantidad INT NOT NULL,
-    CONSTRAINT PK_PedidosProductos PRIMARY KEY (IdPedido, IdProducto),
+    Cantidad INT,
+    PRIMARY KEY (IdPedido, IdProducto),
 	CONSTRAINT FK_PedidosProductos_Pedido FOREIGN KEY (IdPedido) REFERENCES Pedidos(IdPedido),
     CONSTRAINT FK_PedidosProductos_Producto FOREIGN KEY (IdProducto) REFERENCES Productos(IdProducto) 
 );
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 CREATE TABLE ProductosCategorias (
     IdCategoria INT,
     IdProducto INT,
@@ -88,9 +93,7 @@ END;
 
 
 EXEC FiltrarPedidosPorFecha '01-01-2023', '31-12-2023';
-=======
-=======
->>>>>>> Stashed changes
+
 INSERT INTO Proveedores (Nombre, Correo, Telefono, Direccion, Pais) VALUES 
     ('Alimentos Naturales S.A.', 'contacto@alimentosnaturales.com', '555-314-6721', 'Avenida Verde 42, Barrio Ecologia, Ciudad Verde', 'Mexico'),
     ('TechnoMakers', 'info@technomakers.com', '555-987-2365', 'Calle Innovacion 98, Parque Tecnologico, Monterrey', 'Mexico'),
@@ -150,10 +153,6 @@ INSERT INTO PedidosProductos (IdPedido, IdProducto, Cantidad) VALUES
     (1, 2, 2), -- 2 Camisetas de Algodon en el pedido 1
     (2, 3, 1), -- 1 Sofa Moderno en el pedido 2
     (2, 4, 1); -- 1 Refrigerador en el pedido 2
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 
 CREATE OR ALTER PROCEDURE pedidosPorProducto
     @idProducto NVARCHAR(255) 
@@ -224,4 +223,16 @@ BEGIN
     JOIN deleted d ON p.IdPedido = d.IdPedido
     JOIN Productos pr ON i.IdProducto = pr.IdProducto
     JOIN Productos pr2 ON d.IdProducto = pr2.IdProducto;
+END;
+
+--procedure que se encarga de coger los proveedores de la base de datos por el pais elegido
+CREATE PROCEDURE FiltrarProveedoresPorPais
+    @Pais NVARCHAR(100)  
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    SELECT * 
+    FROM Proveedores
+    WHERE Pais = @Pais;
 END;
