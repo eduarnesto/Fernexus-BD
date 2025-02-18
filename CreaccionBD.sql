@@ -95,7 +95,7 @@ BEGIN
     SELECT * 
     FROM Pedidos P
     INNER JOIN PedidosProductos PP ON PP.IdPedido = P.IdPedido
-    WHERE PP.IdProducto = IdProducto;
+    WHERE PP.IdProducto = @idProducto;
 END;
 
 --exec productosPorCategoria @idCategoria=''
