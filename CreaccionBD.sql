@@ -57,41 +57,6 @@ CREATE TABLE ProductosCategorias (
 );
 GO
 
-CREATE PROCEDURE productosPorPedido 
-    @idPedido NVARCHAR(255) 
-AS
-BEGIN
-    SELECT * 
-    FROM Productos P
-    INNER JOIN PedidosProductos PP ON PP.IdProducto = P.IdProducto
-    WHERE PP.IdPedido = @idPedido;
-END;
-
-GO
-
-CREATE PROCEDURE productosPorCategoria 
-    @idCategoria NVARCHAR(255)  
-AS
-BEGIN
-    SELECT * 
-    FROM Productos P
-    INNER JOIN ProductosCategorias PC ON PC.IdProducto = P.IdProducto
-    WHERE PC.IdCategoria = @idCategoria;
-END;
-
-exec productosPorPedido 12
-
-CREATE PROCEDURE FiltrarPedidosPorFecha 
-    @FechaInicio DATETIME, 
-    @FechaFin DATETIME
-AS
-BEGIN
-    SELECT * 
-    FROM Pedidos
-    WHERE FechaPedido BETWEEN @FechaInicio AND @FechaFin;
-END;
-
-
 EXEC FiltrarPedidosPorFecha '01-01-2023', '31-12-2023';
 
 INSERT INTO Proveedores (Nombre, Correo, Telefono, Direccion, Pais) VALUES 
@@ -154,8 +119,8 @@ INSERT INTO PedidosProductos (IdPedido, IdProducto, Cantidad) VALUES
     (2, 3, 1), -- 1 Sofa Moderno en el pedido 2
     (2, 4, 1); -- 1 Refrigerador en el pedido 2
 
-CREATE OR ALTER PROCEDURE pedidosPorProducto
-    @idProducto NVARCHAR(255) 
+CREATE OR ALTER PROCEDURE filtrarPedidosPorProducto
+    @idProducto INT
 AS
 BEGIN
     SELECT * 
@@ -182,6 +147,27 @@ BEGIN
     FROM Productos p
     INNER JOIN ProductosCategorias pc ON p.IdProducto = pc.IdProducto
     WHERE pc.IdCategoria = @idCategoria;
+END;
+
+CREATE PROCEDURE filtrarPedidosPorFecha 
+    @FechaInicio DATETIME, 
+    @FechaFin DATETIME
+AS
+BEGIN
+    SELECT * 
+    FROM Pedidos
+    WHERE FechaPedido BETWEEN @FechaInicio AND @FechaFin;
+END;
+
+CREATE PROCEDURE filtrarProveedoresPorPais
+    @Pais NVARCHAR(100)  
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    SELECT * 
+    FROM Proveedores
+    WHERE Pais = @Pais;
 END;
 
 CREATE TRIGGER trg_AfterInsert_PedidosProductos
@@ -223,16 +209,4 @@ BEGIN
     JOIN deleted d ON p.IdPedido = d.IdPedido
     JOIN Productos pr ON i.IdProducto = pr.IdProducto
     JOIN Productos pr2 ON d.IdProducto = pr2.IdProducto;
-END;
-
---procedure que se encarga de coger los proveedores de la base de datos por el pais elegido
-CREATE PROCEDURE FiltrarProveedoresPorPais
-    @Pais NVARCHAR(100)  
-AS
-BEGIN
-    SET NOCOUNT ON;
-    
-    SELECT * 
-    FROM Proveedores
-    WHERE Pais = @Pais;
 END;
