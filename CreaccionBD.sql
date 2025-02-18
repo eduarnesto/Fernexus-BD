@@ -73,3 +73,15 @@ VALUES
     ('Ropa de Cama 3 Piezas', 75.99, 6), -- Hogar y Cocina
     ('Cargador Solar', 25.99, 1), -- Tecnología
     ('Proyector Portátil', 210.50, 1); -- Tecnología
+
+
+CREATE PROCEDURE FiltrarProveedoresPorPais
+    @Pais NVARCHAR(100)  
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    SELECT * 
+    FROM Proveedores
+    WHERE Pais = @Pais;
+END;
