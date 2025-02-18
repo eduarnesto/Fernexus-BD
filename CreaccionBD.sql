@@ -97,8 +97,25 @@ BEGIN
     WHERE PP.IdProducto = @idProducto;
 END;
 
---exec productosPorCategoria @idCategoria=''
---exec productosPorPedido @idPedido=''
+CREATE OR ALTER PROCEDURE filtrarPedidosPorFechas
+    @fechaInicio DATETIME,
+    @fechaFin DATETIME
+AS
+BEGIN
+    SELECT *
+    FROM Pedidos
+    WHERE FechaPedido BETWEEN @fechaInicio AND @fechaFin;
+END;
+
+CREATE OR ALTER PROCEDURE filtrarProductosPorCategoria
+    @idCategoria INT
+AS
+BEGIN
+    SELECT p.*
+    FROM Productos p
+    INNER JOIN ProductosCategorias pc ON p.IdProducto = pc.IdProducto
+    WHERE pc.IdCategoria = @idCategoria;
+END;
 
 CREATE TRIGGER trg_AfterInsert_PedidosProductos
 ON PedidosProductos
