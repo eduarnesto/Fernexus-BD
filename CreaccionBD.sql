@@ -22,6 +22,7 @@ CREATE TABLE PedidosProductos (
 	CONSTRAINT FK_PedidosProductos_Pedido FOREIGN KEY (IdPedido) REFERENCES Pedidos(IdPedido),
     CONSTRAINT FK_PedidosProductos_Producto FOREIGN KEY (IdProducto) REFERENCES Productos(IdProducto) 
 );
+
 INSERT INTO Proveedores (Nombre, Correo, Telefono, Direccion, Pais)
 VALUES 
     ('Alimentos Naturales S.A.', 'contacto@alimentosnaturales.com', '555-314-6721', 'Avenida Verde 42, Barrio Ecología, Ciudad Verde', 'México'),
