@@ -1,3 +1,12 @@
+Create database Fernexus
+Use Fernexus
+
+CREATE TABLE Pedidos (
+    IdPedido INT IDENTITY(1,1),
+    FechaPedido DateTime NOT NULL,
+    Coste DECIMAL(10,2),
+	CONSTRAINT PK_Pedidos PRIMARY KEY (IdPedido)
+);
 
 CREATE TABLE Productos (
     IdProducto INT IDENTITY(1,1),
@@ -14,15 +23,8 @@ CREATE TABLE Proveedores (
     Correo VARCHAR (255) UNIQUE NOT NULL,
     Telefono VARCHAR (20) NOT NULL,
     Direccion TEXT NOT NULL,
-    Pais VARCHAR (100) NOT NULL,
+    Pais VARCHAR (100) NOT NULL
 	CONSTRAINT PK_Proveedores PRIMARY KEY (IdProveedor)
-);
-
-CREATE TABLE Pedidos (
-    IdPedido INT IDENTITY(1,1),
-    FechaPedido DateTime NOT NULL,
-    Coste DECIMAL(10,2),
-	CONSTRAINT PK_Pedidos PRIMARY KEY (IdPedido)
 );
 
 CREATE TABLE Categorias (
@@ -43,7 +45,7 @@ CREATE TABLE PedidosProductos (
 CREATE TABLE ProductosCategorias (
     IdCategoria INT,
     IdProducto INT,
-    CONSTRAINT PK_ProductosCategoriasProductos PRIMARY KEY (IdCategoria, IdProducto),
+    CONSTRAINT PK_ProductosCategorias PRIMARY KEY (IdCategoria, IdProducto),
     CONSTRAINT FK_ProductosCategorias_Categoria FOREIGN KEY (IdCategoria) REFERENCES Categorias(IdCategoria),
     CONSTRAINT FK_ProductosCategorias_Producto FOREIGN KEY (IdProducto) REFERENCES Productos(IdProducto)
 );
@@ -59,5 +61,17 @@ BEGIN
     WHERE PP.IdPedido = @idPedido;
 END;
 
+GO
 
-EXEC productosPorPedido @idPedido = 255;
+CREATE PROCEDURE productosPorCategoria 
+    @idCategoria NVARCHAR(255)  
+AS
+BEGIN
+    SELECT * 
+    FROM Productos P
+    INNER JOIN ProductosCategorias PC ON PC.IdProducto = P.IdProducto
+    WHERE PC.IdCategoria = @idCategoria;
+END;
+
+--exec productosPorCategoria @idCategoria=''
+--exec productosPorPedido @idPedido=''
