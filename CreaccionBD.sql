@@ -48,32 +48,111 @@ CREATE TABLE PedidosProductos (
     CONSTRAINT FK_PedidosProductos_Producto FOREIGN KEY (IdProducto) REFERENCES Productos(IdProducto) 
 );
 
-INSERT INTO Proveedores (Nombre, Correo, Telefono, Direccion, Pais)
-VALUES 
-    ('Alimentos Naturales S.A.', 'contacto@alimentosnaturales.com', '555-314-6721', 'Avenida Verde 42, Barrio Ecolog�a, Ciudad Verde', 'M�xico'),
-    ('TechnoMakers', 'info@technomakers.com', '555-987-2365', 'Calle Innovaci�n 98, Parque Tecnol�gico, Monterrey', 'M�xico'),
-    ('Muebles del Sol', 'ventas@mueblesdelsol.com', '555-145-8320', 'Avenida los Robles 3, Zona Industrial, Guadalajara', 'M�xico'),
-    ('Distribuidora R�pida', 'soporte@distribuidorarapida.com', '555-876-9034', 'Calle del Comercio 21, Sector 5, Ciudad Industrial', 'Colombia'),
-    ('Jardines & Flores', 'ventas@jardinesyflores.com', '555-234-8765', 'Calle de las Flores 15, Parque Natural, Bogot�', 'Colombia'),
-    ('Electro Mundo', 'atencion@electromundo.com', '555-659-7452', 'Avenida Circuito 55, Pol�gono El�ctrico, Buenos Aires', 'Argentina'),
-    ('Ladrillos Fenix', 'contacto@ladrillosfenix.com', '555-783-2154', 'Avenida F�nix 12, Zona de Construcci�n, Rosario', 'Argentina'),
-    ('R�pido Transporte', 'contacto@rapidotransporte.com', '555-912-7843', 'Calle de los Transportistas 29, Zona Log�stica, Lima', 'Per�'),
-    ('Caf� Monta�a', 'info@cafemontana.com', '555-642-1384', 'Calle Bosques 7, Centro Agropecuario, Cusco', 'Per�'),
+CREATE TABLE ProductosCategorias (
+    IdCategoria INT,
+    IdProducto INT,
+    CONSTRAINT PK_ProductosCategorias PRIMARY KEY (IdCategoria, IdProducto),
+    CONSTRAINT FK_ProductosCategorias_Categoria FOREIGN KEY (IdCategoria) REFERENCES Categorias(IdCategoria),
+    CONSTRAINT FK_ProductosCategorias_Producto FOREIGN KEY (IdProducto) REFERENCES Productos(IdProducto)
+);
+GO
+
+CREATE PROCEDURE productosPorPedido 
+    @idPedido NVARCHAR(255) 
+AS
+BEGIN
+    SELECT * 
+    FROM Productos P
+    INNER JOIN PedidosProductos PP ON PP.IdProducto = P.IdProducto
+    WHERE PP.IdPedido = @idPedido;
+END;
+
+GO
+
+CREATE PROCEDURE productosPorCategoria 
+    @idCategoria NVARCHAR(255)  
+AS
+BEGIN
+    SELECT * 
+    FROM Productos P
+    INNER JOIN ProductosCategorias PC ON PC.IdProducto = P.IdProducto
+    WHERE PC.IdCategoria = @idCategoria;
+END;
+
+exec productosPorPedido 12
+
+CREATE PROCEDURE FiltrarPedidosPorFecha 
+    @FechaInicio DATETIME, 
+    @FechaFin DATETIME
+AS
+BEGIN
+    SELECT * 
+    FROM Pedidos
+    WHERE FechaPedido BETWEEN @FechaInicio AND @FechaFin;
+END;
+
+
+EXEC FiltrarPedidosPorFecha '01-01-2023', '31-12-2023';
+
+INSERT INTO Proveedores (Nombre, Correo, Telefono, Direccion, Pais) VALUES 
+    ('Alimentos Naturales S.A.', 'contacto@alimentosnaturales.com', '555-314-6721', 'Avenida Verde 42, Barrio Ecologia, Ciudad Verde', 'Mexico'),
+    ('TechnoMakers', 'info@technomakers.com', '555-987-2365', 'Calle Innovacion 98, Parque Tecnologico, Monterrey', 'Mexico'),
+    ('Muebles del Sol', 'ventas@mueblesdelsol.com', '555-145-8320', 'Avenida los Robles 3, Zona Industrial, Guadalajara', 'Mexico'),
+    ('Distribuidora Rapida', 'soporte@distribuidorarapida.com', '555-876-9034', 'Calle del Comercio 21, Sector 5, Ciudad Industrial', 'Colombia'),
+    ('Jardines & Flores', 'ventas@jardinesyflores.com', '555-234-8765', 'Calle de las Flores 15, Parque Natural, Bogota', 'Colombia'),
+    ('Electro Mundo', 'atencion@electromundo.com', '555-659-7452', 'Avenida Circuito 55, Poligono Electrico, Buenos Aires', 'Argentina'),
+    ('Ladrillos Fenix', 'contacto@ladrillosfenix.com', '555-783-2154', 'Avenida Fenix 12, Zona de Construccion, Rosario', 'Argentina'),
+    ('Rapido Transporte', 'contacto@rapidotransporte.com', '555-912-7843', 'Calle de los Transportistas 29, Zona Logistica, Lima', 'Peru'),
+    ('Cafe Montana', 'info@cafemontana.com', '555-642-1384', 'Calle Bosques 7, Centro Agropecuario, Cusco', 'Peru'),
     ('Arte & Creatividad', 'contacto@arteycreatividad.com', '555-237-6541', 'Calle del Arte 15, Barrio de los Creadores, Santiago', 'Chile');
 
 
-INSERT INTO Categorias (nombre)
-VALUES 
-    ('Tecnolog�a'),
+INSERT INTO Categorias (nombre) VALUES 
+    ('Tecnologia'),
     ('Ropa y Accesorios'),
     ('Muebles'),
-    ('Electrodom�sticos'),
+    ('Electrodomesticos'),
     ('Deportes y Aire Libre'),
     ('Hogar y Cocina'),
     ('Salud y Belleza'),
     ('Juguetes y Juegos'),
-    ('Autom�viles y Accesorios'),
-    ('Oficina y Papeler�a');
+    ('Automoviles y Accesorios'),
+    ('Oficina y Papeleria');
+
+INSERT INTO Productos (Nombre, Precio, IdCategoria) VALUES 
+    ('Laptop Gaming', 1200.00, 1), -- Tecnologia
+    ('Camiseta de Algodon', 20.00, 2), -- Ropa y Accesorios
+    ('Sofa Moderno', 500.00, 3), -- Muebles
+    ('Refrigerador', 800.00, 4), -- Electrodomesticos
+    ('Raqueta de Tenis', 50.00, 5), -- Deportes y Aire Libre
+    ('Olla de Cocina', 30.00, 6), -- Hogar y Cocina
+    ('Crema Hidratante', 15.00, 7), -- Salud y Belleza
+    ('Juego de Mesa', 25.00, 8), -- Juguetes y Juegos
+    ('Bicicleta', 300.00, 9), -- Automoviles y Accesorios
+    ('Impresora', 150.00, 10); -- Oficina y Papeleria
+
+INSERT INTO Pedidos (FechaPedido, Coste) VALUES 
+    (GETDATE(), 0.00), -- Pedido inicial con coste 0
+    (GETDATE(), 0.00), -- Otro pedido inicial
+    (GETDATE(), 0.00); -- Otro pedido inicial
+
+INSERT INTO ProductosCategorias (IdCategoria, IdProducto) VALUES 
+    (1, 1), -- Laptop Gaming en Tecnologia
+    (2, 2), -- Camiseta de Algodon en Ropa y Accesorios
+    (3, 3), -- Sofa Moderno en Muebles
+    (4, 4), -- Refrigerador en Electrodomesticos
+    (5, 5), -- Raqueta de Tenis en Deportes y Aire Libre
+    (6, 6), -- Olla de Cocina en Hogar y Cocina
+    (7, 7), -- Crema Hidratante en Salud y Belleza
+    (8, 8), -- Juego de Mesa en Juguetes y Juegos
+    (9, 9), -- Bicicleta en Automoviles y Accesorios
+    (10, 10); -- Impresora en Oficina y Papeleria
+
+INSERT INTO PedidosProductos (IdPedido, IdProducto, Cantidad) VALUES 
+    (1, 1, 1), -- 1 Laptop Gaming en el pedido 1
+    (1, 2, 2), -- 2 Camisetas de Algodon en el pedido 1
+    (2, 3, 1), -- 1 Sofa Moderno en el pedido 2
+    (2, 4, 1); -- 1 Refrigerador en el pedido 2
 
 CREATE OR ALTER PROCEDURE pedidosPorProducto
     @idProducto NVARCHAR(255) 
