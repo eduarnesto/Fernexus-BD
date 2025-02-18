@@ -16,7 +16,6 @@ CREATE TABLE Productos (
 	CONSTRAINT PK_Productos PRIMARY KEY (IdProducto),
 );
 
-
 CREATE TABLE Proveedores (
     IdProveedor INT IDENTITY(1,1),
     Nombre VARCHAR (255) NOT NULL,
@@ -88,3 +87,44 @@ END;
 EXEC FiltrarPedidosPorFecha '01-01-2023', '31-12-2023';
 --exec productosPorCategoria @idCategoria=''
 --exec productosPorPedido @idPedido=''
+
+CREATE TRIGGER trg_AfterInsert_PedidosProductos
+ON PedidosProductos
+AFTER INSERT
+AS
+BEGIN
+    UPDATE p
+    SET p.Coste = ISNULL(p.Coste, 0) + (i.Cantidad * pr.Precio)
+    FROM Pedidos p
+    JOIN inserted i ON p.IdPedido = i.IdPedido
+    JOIN Productos pr ON i.IdProducto = pr.IdProducto
+END;
+
+CREATE TRIGGER trg_AfterDelete_PedidosProductos
+ON PedidosProductos
+AFTER DELETE
+AS
+BEGIN
+    UPDATE p
+    SET p.Coste = ISNULL(p.Coste, 0) - (d.Cantidad * pr.Precio)
+    FROM Pedidos p
+    JOIN deleted d ON p.IdPedido = d.IdPedido
+    JOIN Productos pr ON d.IdProducto = pr.IdProducto;
+END;
+
+CREATE TRIGGER trg_AfterUpdate_PedidosProductos
+ON PedidosProductos
+AFTER UPDATE
+AS
+BEGIN
+    -- Actualizar el coste en caso de que la cantidad cambie
+    UPDATE p
+    SET p.Coste = ISNULL(p.Coste, 0) 
+                  + (i.Cantidad * pr.Precio) 
+                  - (d.Cantidad * pr2.Precio)
+    FROM Pedidos p
+    JOIN inserted i ON p.IdPedido = i.IdPedido
+    JOIN deleted d ON p.IdPedido = d.IdPedido
+    JOIN Productos pr ON i.IdProducto = pr.IdProducto
+    JOIN Productos pr2 ON d.IdProducto = pr2.IdProducto;
+END;
