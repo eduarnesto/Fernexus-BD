@@ -42,6 +42,7 @@ CREATE TABLE PedidosProductos (
 );
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 CREATE TABLE ProductosCategorias (
     IdCategoria INT,
     IdProducto INT,
@@ -88,6 +89,8 @@ END;
 
 EXEC FiltrarPedidosPorFecha '01-01-2023', '31-12-2023';
 =======
+=======
+>>>>>>> Stashed changes
 INSERT INTO Proveedores (Nombre, Correo, Telefono, Direccion, Pais) VALUES 
     ('Alimentos Naturales S.A.', 'contacto@alimentosnaturales.com', '555-314-6721', 'Avenida Verde 42, Barrio Ecologia, Ciudad Verde', 'Mexico'),
     ('TechnoMakers', 'info@technomakers.com', '555-987-2365', 'Calle Innovacion 98, Parque Tecnologico, Monterrey', 'Mexico'),
@@ -147,6 +150,9 @@ INSERT INTO PedidosProductos (IdPedido, IdProducto, Cantidad) VALUES
     (1, 2, 2), -- 2 Camisetas de Algodon en el pedido 1
     (2, 3, 1), -- 1 Sofa Moderno en el pedido 2
     (2, 4, 1); -- 1 Refrigerador en el pedido 2
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 
 CREATE OR ALTER PROCEDURE pedidosPorProducto
