@@ -1,10 +1,5 @@
-CREATE TABLE Productos (
-    idProducto INT IDENTITY(1,1),
-    nombre VARCHAR(255) NOT NULL,
-    precio DECIMAL(10,2) NOT NULL,
-    idCategoria INT,
-	CONSTRAINT PK_Productos PRIMARY KEY (IdPedido),
-);
+Create database Fernexus
+Use Fernexus
 
 CREATE TABLE Pedidos (
     IdPedido INT IDENTITY(1,1),
@@ -13,17 +8,36 @@ CREATE TABLE Pedidos (
 	CONSTRAINT PK_Pedidos PRIMARY KEY (IdPedido)
 );
 
+CREATE TABLE Productos (
+    IdProducto INT IDENTITY(1,1),
+    Nombre VARCHAR(255) NOT NULL,
+    Precio DECIMAL(10,2) NOT NULL,
+    IdCategoria INT,
+	CONSTRAINT PK_Productos PRIMARY KEY (IdProducto),
+);
+
+
+CREATE TABLE Proveedores (
+    IdProveedor INT IDENTITY(1,1),
+    Nombre VARCHAR (255) NOT NULL,
+    Correo VARCHAR (255) UNIQUE NOT NULL,
+    Telefono VARCHAR (20) NOT NULL,
+    Direccion TEXT NOT NULL,
+    Pais VARCHAR (100) NOT NULL
+	CONSTRAINT PK_Proveedores PRIMARY KEY (IdProveedor)
+);
+
 CREATE TABLE Categorias (
     IdCategoria INT IDENTITY(1,1),
     nombre VARCHAR(255) NOT NULL,
-	CONSTRAINT PK_Pedidos PRIMARY KEY (IdCategoria)
+	CONSTRAINT PK_Categorias PRIMARY KEY (IdCategoria)
 );
 
 CREATE TABLE PedidosProductos (
     IdPedido INT,
     IdProducto INT,
     Cantidad INT NOT NULL,
-    CONSTRAINT PK_Pedidos PRIMARY KEY (IdPedido, IdProducto),
+    CONSTRAINT PK_PedidosProductos PRIMARY KEY (IdPedido, IdProducto),
 	CONSTRAINT FK_PedidosProductos_Pedido FOREIGN KEY (IdPedido) REFERENCES Pedidos(IdPedido),
     CONSTRAINT FK_PedidosProductos_Producto FOREIGN KEY (IdProducto) REFERENCES Productos(IdProducto) 
 );
@@ -38,7 +52,7 @@ CREATE TABLE ProductosCategorias (
 GO
 
 CREATE PROCEDURE productosPorPedido 
-    @idPedido NVARCHAR(255)  -- Correct syntax for parameter type
+    @idPedido NVARCHAR(255) 
 AS
 BEGIN
     SELECT * 
@@ -47,5 +61,17 @@ BEGIN
     WHERE PP.IdPedido = @idPedido;
 END;
 
+GO
 
---exec productosPorPedido
+CREATE PROCEDURE productosPorCategoria 
+    @idCategoria NVARCHAR(255)  
+AS
+BEGIN
+    SELECT * 
+    FROM Productos P
+    INNER JOIN ProductosCategorias PC ON PC.IdProducto = P.IdProducto
+    WHERE PC.IdCategoria = @idCategoria;
+END;
+
+--exec productosPorCategoria @idCategoria=''
+--exec productosPorPedido @idPedido=''
