@@ -146,6 +146,7 @@ BEGIN
     JOIN Productos pr2 ON d.IdProducto = pr2.IdProducto;
 END;
 
+--procedure que se encarga de coger los proveedores de la base de datos por el pais elegido
 CREATE PROCEDURE FiltrarProveedoresPorPais
     @Pais NVARCHAR(100)  
 AS
