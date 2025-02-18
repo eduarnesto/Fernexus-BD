@@ -145,3 +145,14 @@ BEGIN
     JOIN Productos pr ON i.IdProducto = pr.IdProducto
     JOIN Productos pr2 ON d.IdProducto = pr2.IdProducto;
 END;
+
+CREATE PROCEDURE FiltrarProveedoresPorPais
+    @Pais NVARCHAR(100)  
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    SELECT * 
+    FROM Proveedores
+    WHERE Pais = @Pais;
+END;
