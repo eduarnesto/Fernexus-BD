@@ -85,6 +85,19 @@ BEGIN
     WHERE FechaPedido BETWEEN @FechaInicio AND @FechaFin;
 END;
 
+
 EXEC FiltrarPedidosPorFecha '01-01-2023', '31-12-2023';
+
+CREATE OR ALTER PROCEDURE pedidosPorProducto
+    @idProducto NVARCHAR(255) 
+AS
+BEGIN
+    SELECT * 
+    FROM Pedidos P
+    INNER JOIN PedidosProductos PP ON PP.IdPedido = P.IdPedido
+    WHERE PP.IdProducto = IdProducto;
+END;
+
 --exec productosPorCategoria @idCategoria=''
 --exec productosPorPedido @idPedido=''
+
