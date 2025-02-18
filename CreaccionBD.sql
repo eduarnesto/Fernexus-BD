@@ -1,5 +1,12 @@
-Create database Fernexus
-Use Fernexus
+CREATE TABLE ProductosCategorias (
+    IdCategoria INT,
+    IdProducto INT,
+    CONSTRAINT PK_ProductosCategorias PRIMARY KEY (IdCategoria, IdProducto),
+    CONSTRAINT FK_ProductosCategorias_Categoria FOREIGN KEY (IdCategoria) 
+        REFERENCES Categorias(IdCategoria),
+    CONSTRAINT FK_ProductosCategorias_Producto FOREIGN KEY (IdProducto) 
+        REFERENCES Productos(IdProducto)
+);
 
 CREATE TABLE Pedidos (
     IdPedido INT IDENTITY(1,1),
@@ -35,57 +42,38 @@ CREATE TABLE Categorias (
 CREATE TABLE PedidosProductos (
     IdPedido INT,
     IdProducto INT,
-    Cantidad INT NOT NULL,
-    CONSTRAINT PK_PedidosProductos PRIMARY KEY (IdPedido, IdProducto),
+    Cantidad INT,
+    PRIMARY KEY (IdPedido, IdProducto),
 	CONSTRAINT FK_PedidosProductos_Pedido FOREIGN KEY (IdPedido) REFERENCES Pedidos(IdPedido),
     CONSTRAINT FK_PedidosProductos_Producto FOREIGN KEY (IdProducto) REFERENCES Productos(IdProducto) 
 );
 
-CREATE TABLE ProductosCategorias (
-    IdCategoria INT,
-    IdProducto INT,
-    CONSTRAINT PK_ProductosCategorias PRIMARY KEY (IdCategoria, IdProducto),
-    CONSTRAINT FK_ProductosCategorias_Categoria FOREIGN KEY (IdCategoria) REFERENCES Categorias(IdCategoria),
-    CONSTRAINT FK_ProductosCategorias_Producto FOREIGN KEY (IdProducto) REFERENCES Productos(IdProducto)
-);
-GO
-
-CREATE PROCEDURE productosPorPedido 
-    @idPedido NVARCHAR(255) 
-AS
-BEGIN
-    SELECT * 
-    FROM Productos P
-    INNER JOIN PedidosProductos PP ON PP.IdProducto = P.IdProducto
-    WHERE PP.IdPedido = @idPedido;
-END;
-
-GO
-
-CREATE PROCEDURE productosPorCategoria 
-    @idCategoria NVARCHAR(255)  
-AS
-BEGIN
-    SELECT * 
-    FROM Productos P
-    INNER JOIN ProductosCategorias PC ON PC.IdProducto = P.IdProducto
-    WHERE PC.IdCategoria = @idCategoria;
-END;
-
-exec productosPorPedido 12
-
-CREATE PROCEDURE FiltrarPedidosPorFecha 
-    @FechaInicio DATETIME, 
-    @FechaFin DATETIME
-AS
-BEGIN
-    SELECT * 
-    FROM Pedidos
-    WHERE FechaPedido BETWEEN @FechaInicio AND @FechaFin;
-END;
+INSERT INTO Proveedores (Nombre, Correo, Telefono, Direccion, Pais)
+VALUES 
+    ('Alimentos Naturales S.A.', 'contacto@alimentosnaturales.com', '555-314-6721', 'Avenida Verde 42, Barrio Ecolog�a, Ciudad Verde', 'M�xico'),
+    ('TechnoMakers', 'info@technomakers.com', '555-987-2365', 'Calle Innovaci�n 98, Parque Tecnol�gico, Monterrey', 'M�xico'),
+    ('Muebles del Sol', 'ventas@mueblesdelsol.com', '555-145-8320', 'Avenida los Robles 3, Zona Industrial, Guadalajara', 'M�xico'),
+    ('Distribuidora R�pida', 'soporte@distribuidorarapida.com', '555-876-9034', 'Calle del Comercio 21, Sector 5, Ciudad Industrial', 'Colombia'),
+    ('Jardines & Flores', 'ventas@jardinesyflores.com', '555-234-8765', 'Calle de las Flores 15, Parque Natural, Bogot�', 'Colombia'),
+    ('Electro Mundo', 'atencion@electromundo.com', '555-659-7452', 'Avenida Circuito 55, Pol�gono El�ctrico, Buenos Aires', 'Argentina'),
+    ('Ladrillos Fenix', 'contacto@ladrillosfenix.com', '555-783-2154', 'Avenida F�nix 12, Zona de Construcci�n, Rosario', 'Argentina'),
+    ('R�pido Transporte', 'contacto@rapidotransporte.com', '555-912-7843', 'Calle de los Transportistas 29, Zona Log�stica, Lima', 'Per�'),
+    ('Caf� Monta�a', 'info@cafemontana.com', '555-642-1384', 'Calle Bosques 7, Centro Agropecuario, Cusco', 'Per�'),
+    ('Arte & Creatividad', 'contacto@arteycreatividad.com', '555-237-6541', 'Calle del Arte 15, Barrio de los Creadores, Santiago', 'Chile');
 
 
-EXEC FiltrarPedidosPorFecha '01-01-2023', '31-12-2023';
+INSERT INTO Categorias (nombre)
+VALUES 
+    ('Tecnolog�a'),
+    ('Ropa y Accesorios'),
+    ('Muebles'),
+    ('Electrodom�sticos'),
+    ('Deportes y Aire Libre'),
+    ('Hogar y Cocina'),
+    ('Salud y Belleza'),
+    ('Juguetes y Juegos'),
+    ('Autom�viles y Accesorios'),
+    ('Oficina y Papeler�a');
 
 CREATE OR ALTER PROCEDURE pedidosPorProducto
     @idProducto NVARCHAR(255) 
