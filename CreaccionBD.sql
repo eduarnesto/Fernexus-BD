@@ -51,7 +51,9 @@ CREATE TABLE ProductosCategorias (
 );
 GO
 
-CREATE PROCEDURE productosPorPedido 
+
+--Procedure que filtrará los productos dado un pedido
+CREATE OR ALTER PROCEDURE productosPorPedido 
     @idPedido NVARCHAR(255) 
 AS
 BEGIN
@@ -63,7 +65,8 @@ END;
 
 GO
 
-CREATE PROCEDURE productosPorCategoria 
+--Procedure que filtrará los productos dada una categoria
+CREATE OR ALTER PROCEDURE productosPorCategoria 
     @idCategoria NVARCHAR(255)  
 AS
 BEGIN
@@ -72,6 +75,19 @@ BEGIN
     INNER JOIN ProductosCategorias PC ON PC.IdProducto = P.IdProducto
     WHERE PC.IdCategoria = @idCategoria;
 END;
+GO
+
+--Procedure que filtrará los pedidos dado un prdocuto
+CREATE OR ALTER PROCEDURE pedidosPorProducto
+    @idProducto NVARCHAR(255) 
+AS
+BEGIN
+    SELECT * 
+    FROM Pedidos P
+    INNER JOIN PedidosProductos PP ON PP.IdPedido = P.IdPedido
+    WHERE PP.IdProducto = IdProducto;
+END;
 
 --exec productosPorCategoria @idCategoria=''
 --exec productosPorPedido @idPedido=''
+--exec pedidosPorProducto @idProducto=''
