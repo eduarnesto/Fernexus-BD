@@ -52,7 +52,7 @@ CREATE TABLE ProductosCategorias (
 GO
 
 CREATE PROCEDURE productosPorPedido 
-    @idPedido NVARCHAR(255)  -- Correct syntax for parameter type
+    @idPedido NVARCHAR(255) 
 AS
 BEGIN
     SELECT * 
@@ -61,6 +61,17 @@ BEGIN
     WHERE PP.IdPedido = @idPedido;
 END;
 
+GO
+
+CREATE PROCEDURE productosPorCategoria 
+    @idCategoria NVARCHAR(255)  
+AS
+BEGIN
+    SELECT * 
+    FROM Productos P
+    INNER JOIN ProductosCategorias PC ON PC.IdProducto = P.IdProducto
+    WHERE PC.IdCategoria = @idCategoria;
+END;
 
 exec productosPorPedido 12
 
@@ -75,3 +86,5 @@ BEGIN
 END;
 
 EXEC FiltrarPedidosPorFecha '01-01-2023', '31-12-2023';
+--exec productosPorCategoria @idCategoria=''
+--exec productosPorPedido @idPedido=''
