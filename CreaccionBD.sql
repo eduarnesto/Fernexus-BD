@@ -46,3 +46,17 @@ CREATE TABLE ProductosCategorias (
     CONSTRAINT FK_ProductosCategorias_Categoria FOREIGN KEY (IdCategoria) REFERENCES Categorias(IdCategoria),
     CONSTRAINT FK_ProductosCategorias_Producto FOREIGN KEY (IdProducto) REFERENCES Productos(IdProducto)
 );
+GO
+
+CREATE PROCEDURE productosPorPedido 
+    @idPedido NVARCHAR(255)  -- Correct syntax for parameter type
+AS
+BEGIN
+    SELECT * 
+    FROM Productos P
+    INNER JOIN PedidosProductos PP ON PP.IdProducto = P.IdProducto
+    WHERE PP.IdPedido = @idPedido;
+END;
+
+
+--exec productosPorPedido
