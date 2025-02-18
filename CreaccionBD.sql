@@ -62,4 +62,16 @@ BEGIN
 END;
 
 
---exec productosPorPedido
+exec productosPorPedido 12
+
+CREATE PROCEDURE FiltrarPedidosPorFecha 
+    @FechaInicio DATETIME, 
+    @FechaFin DATETIME
+AS
+BEGIN
+    SELECT * 
+    FROM Pedidos
+    WHERE FechaPedido BETWEEN @FechaInicio AND @FechaFin;
+END;
+
+EXEC FiltrarPedidosPorFecha '01-01-2023', '31-12-2023';
