@@ -1,3 +1,5 @@
+Create TYPE ListaProductos as TABLE (idProducto INT)
+
 CREATE TABLE ProductosCategorias (
     IdCategoria INT,
     IdProducto INT,
@@ -149,16 +151,6 @@ BEGIN
     WHERE pc.IdCategoria = @idCategoria;
 END;
 
-CREATE PROCEDURE filtrarPedidosPorFecha 
-    @FechaInicio DATETIME, 
-    @FechaFin DATETIME
-AS
-BEGIN
-    SELECT * 
-    FROM Pedidos
-    WHERE FechaPedido BETWEEN @FechaInicio AND @FechaFin;
-END;
-
 CREATE PROCEDURE filtrarProveedoresPorPais
     @Pais NVARCHAR(100)  
 AS
@@ -168,6 +160,56 @@ BEGIN
     SELECT * 
     FROM Proveedores
     WHERE Pais = @Pais;
+END;
+
+CREATE PROCEDURE crearPedido
+    @lista ListaProductos READONLY
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @NuevoPedidoId INT;
+    DECLARE @TotalCoste DECIMAL(10,2) = 0;
+
+    -- Crear un nuevo pedido con coste inicial 0
+    INSERT INTO Pedidos (FechaPedido)
+    VALUES (GETDATE());
+
+    -- Obtener el ID del pedido recién creado
+    SET @NuevoPedidoId = SCOPE_IDENTITY();
+
+    -- Insertar los productos en la tabla PedidosProductos con cantidad predeterminada (ejemplo: 1)
+    INSERT INTO PedidosProductos (IdPedido, IdProducto, Cantidad)
+    SELECT @NuevoPedidoId, lp.idProducto, 1
+    FROM @lista lp;
+
+    -- Devolver el ID del pedido creado
+    SELECT * from Pedidos as P where P.IdPedido = @NuevoPedidoId;
+END;
+
+CREATE PROCEDURE modificarPedido
+    @IdPedido INT,
+    @lista ListaProductos READONLY
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Verificar si el pedido existe
+    IF NOT EXISTS (SELECT 1 FROM Pedidos WHERE IdPedido = @IdPedido)
+    BEGIN
+        RAISERROR('El pedido con IdPedido %d no existe.', 16, 1, @IdPedido);
+        RETURN;
+    END
+
+    -- Eliminar productos existentes del pedido
+    DELETE FROM PedidosProductos WHERE IdPedido = @IdPedido;
+
+    -- Eliminar productos que están en la lista
+    DELETE FROM PedidosProductos 
+    WHERE IdPedido = @IdPedido AND IdProducto IN (SELECT idProducto FROM @lista);
+
+    -- Devolver el pedido modificado
+    SELECT * FROM Pedidos WHERE IdPedido = @IdPedido;
 END;
 
 CREATE TRIGGER trg_AfterInsert_PedidosProductos
