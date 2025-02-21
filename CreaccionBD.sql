@@ -1,4 +1,4 @@
-Create TYPE ListaProductos as TABLE (idProducto INT)
+Create TYPE ListaProductos as TABLE (idProducto INT, idProveedor INT)
 
 CREATE TABLE ProductosCategorias (
     IdCategoria INT,
@@ -14,14 +14,15 @@ CREATE TABLE Pedidos (
     IdPedido INT IDENTITY(1,1),
     FechaPedido DateTime NOT NULL,
     Coste DECIMAL(10,2),
-	CONSTRAINT PK_Pedidos PRIMARY KEY (IdPedido)
+	IdProveedor INT,
+	CONSTRAINT PK_Pedidos PRIMARY KEY (IdPedido),
+	CONSTRAINT FK_Pedidos_Proveedores FOREIGN KEY (IdProveedor) 
+        REFERENCES Proveedores(IdProveedor)
 );
 
 CREATE TABLE Productos (
     IdProducto INT IDENTITY(1,1),
     Nombre VARCHAR(255) NOT NULL,
-    Precio DECIMAL(10,2) NOT NULL,
-    IdCategoria INT,
 	CONSTRAINT PK_Productos PRIMARY KEY (IdProducto),
 );
 
@@ -57,9 +58,14 @@ CREATE TABLE ProductosCategorias (
     CONSTRAINT FK_ProductosCategorias_Categoria FOREIGN KEY (IdCategoria) REFERENCES Categorias(IdCategoria),
     CONSTRAINT FK_ProductosCategorias_Producto FOREIGN KEY (IdProducto) REFERENCES Productos(IdProducto)
 );
-GO
 
-EXEC FiltrarPedidosPorFecha '01-01-2023', '31-12-2023';
+CREATE TABLE ProveedoresPedidos (
+    IdProveedor INT,
+    IdProducto INT,
+    CONSTRAINT PK_ProveedoresPedidos PRIMARY KEY (IdProveedor, IdProducto),
+    CONSTRAINT FK_ProveedoresPedidos_Proveedores FOREIGN KEY (IdProveedor) REFERENCES Proveedores(IdProveedor),
+    CONSTRAINT FK_ProveedoresPedidos_Pedidos FOREIGN KEY (IdProducto) REFERENCES Productos(IdProducto)
+);
 
 INSERT INTO Proveedores (Nombre, Correo, Telefono, Direccion, Pais) VALUES 
     ('Alimentos Naturales S.A.', 'contacto@alimentosnaturales.com', '555-314-6721', 'Avenida Verde 42, Barrio Ecologia, Ciudad Verde', 'Mexico'),
@@ -163,25 +169,24 @@ BEGIN
 END;
 
 CREATE PROCEDURE crearPedido
-    @lista ListaProductos READONLY
+    @lista ListaProductos READONLY,
+	@IdProveedor INT
 AS
 BEGIN
-    SET NOCOUNT ON;
-
-    DECLARE @NuevoPedidoId INT;
-    DECLARE @TotalCoste DECIMAL(10,2) = 0;
+	DECLARE @NuevoPedidoId INT;
 
     -- Crear un nuevo pedido con coste inicial 0
-    INSERT INTO Pedidos (FechaPedido)
-    VALUES (GETDATE());
+    INSERT INTO Pedidos (FechaPedido, IdProveedor)
+    VALUES (GETDATE(), @IdProveedor);
 
     -- Obtener el ID del pedido recién creado
     SET @NuevoPedidoId = SCOPE_IDENTITY();
 
     -- Insertar los productos en la tabla PedidosProductos con cantidad predeterminada (ejemplo: 1)
     INSERT INTO PedidosProductos (IdPedido, IdProducto, Cantidad)
-    SELECT @NuevoPedidoId, lp.idProducto, 1
-    FROM @lista lp;
+    SELECT @NuevoPedidoId, lp.idProducto, COUNT(*)
+    FROM @lista lp
+	GROUP BY lp.idProducto;
 
     -- Devolver el ID del pedido creado
     SELECT * from Pedidos as P where P.IdPedido = @NuevoPedidoId;
