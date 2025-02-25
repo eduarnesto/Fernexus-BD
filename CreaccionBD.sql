@@ -16,6 +16,7 @@ CREATE TABLE Pedidos (
 	CONSTRAINT PK_Pedidos PRIMARY KEY (IdPedido)
 );
 
+
 CREATE TABLE Productos (
     IdProducto INT IDENTITY(1,1),
     Nombre VARCHAR(255) NOT NULL,
@@ -71,7 +72,6 @@ INSERT INTO Proveedores (Nombre, Correo, Telefono, Direccion, Pais) VALUES
     ('Cafe Montana', 'info@cafemontana.com', '555-642-1384', 'Calle Bosques 7, Centro Agropecuario, Cusco', 'Peru'),
     ('Arte & Creatividad', 'contacto@arteycreatividad.com', '555-237-6541', 'Calle del Arte 15, Barrio de los Creadores, Santiago', 'Chile');
 
-
 INSERT INTO Categorias (nombre) VALUES 
     ('Tecnologia'),
     ('Ropa y Accesorios'),
@@ -85,17 +85,17 @@ INSERT INTO Categorias (nombre) VALUES
     ('Oficina y Papeleria');
 
 
-INSERT INTO Productos (Nombre, Precio, IdCategoria) VALUES 
-    ('Laptop Gaming', 1200.00, 1), -- Tecnologia
-    ('Camiseta de Algodon', 20.00, 2), -- Ropa y Accesorios
-    ('Sofa Moderno', 500.00, 3), -- Muebles
-    ('Refrigerador', 800.00, 4), -- Electrodomesticos
-    ('Raqueta de Tenis', 50.00, 5), -- Deportes y Aire Libre
-    ('Olla de Cocina', 30.00, 6), -- Hogar y Cocina
-    ('Crema Hidratante', 15.00, 7), -- Salud y Belleza
-    ('Juego de Mesa', 25.00, 8), -- Juguetes y Juegos
-    ('Bicicleta', 300.00, 9), -- Automoviles y Accesorios
-    ('Impresora', 150.00, 10); -- Oficina y Papeleria
+INSERT INTO Productos (Nombre) VALUES 
+    ('Laptop Gaming'), -- Tecnologia
+    ('Camiseta de Algodon'), -- Ropa y Accesorios
+    ('Sofa Moderno'), -- Muebles
+    ('Refrigerador'), -- Electrodomesticos
+    ('Raqueta de Tenis'), -- Deportes y Aire Libre
+    ('Olla de Cocina'), -- Hogar y Cocina
+    ('Crema Hidratante'), -- Salud y Belleza
+    ('Juego de Mesa'), -- Juguetes y Juegos
+    ('Bicicleta'), -- Automoviles y Accesorios
+    ('Impresora'); -- Oficina y Papeleria
 
 
 INSERT INTO Pedidos (FechaPedido, Coste) VALUES 
@@ -181,9 +181,7 @@ BEGIN
         p.Coste,
         pr.IdProducto,
         pr.Nombre AS NombreProducto,
-        pr.Precio AS PrecioUnitario,
-        pp.Cantidad,
-        (pr.Precio * pp.Cantidad) AS Subtotal
+        pp.Cantidad
     FROM Pedidos p
     LEFT JOIN PedidosProductos pp ON p.IdPedido = pp.IdPedido
     LEFT JOIN Productos pr ON pp.IdProducto = pr.IdProducto
@@ -191,6 +189,7 @@ BEGIN
 END;
 
 
+<<<<<<< Updated upstream
 CREATE OR ALTER PROCEDURE obtenerProveedorPorId
     @IdProveedor INT
 AS
@@ -204,6 +203,8 @@ END;
 
 
 
+=======
+>>>>>>> Stashed changes
 CREATE TRIGGER trg_AfterInsert_PedidosProductos
 ON PedidosProductos
 AFTER INSERT
