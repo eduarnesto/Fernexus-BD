@@ -1,3 +1,5 @@
+Create TYPE ListaProductos as TABLE (idProducto INT, idProveedor INT)
+
 CREATE TABLE ProductosCategorias (
     IdCategoria INT,
     IdProducto INT,
@@ -13,14 +15,15 @@ CREATE TABLE Pedidos (
     IdPedido INT IDENTITY(1,1),
     FechaPedido DateTime NOT NULL,
     Coste DECIMAL(10,2),
-	CONSTRAINT PK_Pedidos PRIMARY KEY (IdPedido)
+	IdProveedor INT,
+	CONSTRAINT PK_Pedidos PRIMARY KEY (IdPedido),
+	CONSTRAINT FK_Pedidos_Proveedores FOREIGN KEY (IdProveedor) 
+        REFERENCES Proveedores(IdProveedor)
 );
 
 CREATE TABLE Productos (
     IdProducto INT IDENTITY(1,1),
     Nombre VARCHAR(255) NOT NULL,
-    Precio DECIMAL(10,2) NOT NULL,
-    IdCategoria INT,
 	CONSTRAINT PK_Productos PRIMARY KEY (IdProducto),
 );
 
@@ -56,8 +59,14 @@ CREATE TABLE ProductosCategorias (
     CONSTRAINT FK_ProductosCategorias_Categoria FOREIGN KEY (IdCategoria) REFERENCES Categorias(IdCategoria),
     CONSTRAINT FK_ProductosCategorias_Producto FOREIGN KEY (IdProducto) REFERENCES Productos(IdProducto)
 );
-GO
 
+CREATE TABLE ProveedoresPedidos (
+    IdProveedor INT,
+    IdProducto INT,
+    CONSTRAINT PK_ProveedoresPedidos PRIMARY KEY (IdProveedor, IdProducto),
+    CONSTRAINT FK_ProveedoresPedidos_Proveedores FOREIGN KEY (IdProveedor) REFERENCES Proveedores(IdProveedor),
+    CONSTRAINT FK_ProveedoresPedidos_Pedidos FOREIGN KEY (IdProducto) REFERENCES Productos(IdProducto)
+);
 
 INSERT INTO Proveedores (Nombre, Correo, Telefono, Direccion, Pais) VALUES 
     ('Alimentos Naturales S.A.', 'contacto@alimentosnaturales.com', '555-314-6721', 'Avenida Verde 42, Barrio Ecologia, Ciudad Verde', 'Mexico'),
@@ -156,7 +165,6 @@ BEGIN
     WHERE pc.IdCategoria = @idCategoria;
 END;
 
-
 CREATE PROCEDURE filtrarProveedoresPorPais
     @Pais NVARCHAR(100)  
 AS
@@ -168,6 +176,33 @@ BEGIN
     WHERE Pais = @Pais;
 END;
 
+CREATE PROCEDURE crearPedido
+    @lista ListaProductos READONLY,
+	@IdProveedor INT
+AS
+BEGIN
+	DECLARE @NuevoPedidoId INT;
+
+    -- Crear un nuevo pedido con coste inicial 0
+    INSERT INTO Pedidos (FechaPedido, IdProveedor)
+    VALUES (GETDATE(), @IdProveedor);
+
+    -- Obtener el ID del pedido reci�n creado
+    SET @NuevoPedidoId = SCOPE_IDENTITY();
+
+    -- Insertar los productos en la tabla PedidosProductos con cantidad predeterminada (ejemplo: 1)
+    INSERT INTO PedidosProductos (IdPedido, IdProducto, Cantidad)
+    SELECT @NuevoPedidoId, lp.idProducto, COUNT(*)
+    FROM @lista lp
+	GROUP BY lp.idProducto;
+
+    -- Devolver el ID del pedido creado
+    SELECT * from Pedidos as P where P.IdPedido = @NuevoPedidoId;
+END;
+
+CREATE PROCEDURE modificarPedido
+    @IdPedido INT,
+    @lista ListaProductos READONLY
 
 CREATE OR ALTER PROCEDURE filtrarPedidosConDatosDelProducto
     @IdPedido INT
@@ -196,13 +231,23 @@ CREATE OR ALTER PROCEDURE obtenerProveedorPorId
 AS
 BEGIN
     SET NOCOUNT ON;
+    -- Verificar si el pedido existe
+    IF NOT EXISTS (SELECT 1 FROM Pedidos WHERE IdPedido = @IdPedido)
+    BEGIN
+        RAISERROR('El pedido con IdPedido %d no existe.', 16, 1, @IdPedido);
+        RETURN;
+    END
 
-    SELECT * 
-    FROM Proveedores
-    WHERE IdProveedor = @IdProveedor;
+    -- Eliminar productos existentes del pedido
+    DELETE FROM PedidosProductos WHERE IdPedido = @IdPedido;
+
+    -- Eliminar productos que estan en la lista
+    DELETE FROM PedidosProductos 
+    WHERE IdPedido = @IdPedido AND IdProducto IN (SELECT idProducto FROM @lista);
+
+    -- Devolver el pedido modificado
+    SELECT * FROM Pedidos WHERE IdPedido = @IdPedido;
 END;
-
-
 
 CREATE TRIGGER trg_AfterInsert_PedidosProductos
 ON PedidosProductos
