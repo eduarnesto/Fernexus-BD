@@ -21,7 +21,6 @@ CREATE TABLE Pedidos (
         REFERENCES Proveedores(IdProveedor)
 );
 
-
 CREATE TABLE Productos (
     IdProducto INT IDENTITY(1,1),
     Nombre VARCHAR(255) NOT NULL,
@@ -61,12 +60,13 @@ CREATE TABLE ProductosCategorias (
     CONSTRAINT FK_ProductosCategorias_Producto FOREIGN KEY (IdProducto) REFERENCES Productos(IdProducto)
 );
 
-CREATE TABLE ProveedoresPedidos (
+CREATE TABLE ProveedoresProductos (
     IdProveedor INT,
     IdProducto INT,
-    CONSTRAINT PK_ProveedoresPedidos PRIMARY KEY (IdProveedor, IdProducto),
-    CONSTRAINT FK_ProveedoresPedidos_Proveedores FOREIGN KEY (IdProveedor) REFERENCES Proveedores(IdProveedor),
-    CONSTRAINT FK_ProveedoresPedidos_Pedidos FOREIGN KEY (IdProducto) REFERENCES Productos(IdProducto)
+    PrecioUnidad DECIMAL(10,2),  -- Añadimos la columna PrecioUnidad
+    CONSTRAINT PK_ProveedoresProductos PRIMARY KEY (IdProveedor, IdProducto),  -- Nombre corregido de PK
+    CONSTRAINT FK_ProveedoresProductos_Proveedores FOREIGN KEY (IdProveedor) REFERENCES Proveedores(IdProveedor),
+    CONSTRAINT FK_ProveedoresProductos_Productos FOREIGN KEY (IdProducto) REFERENCES Productos(IdProducto)
 );
 
 INSERT INTO Proveedores (Nombre, Correo, Telefono, Direccion, Pais) VALUES 
@@ -112,6 +112,14 @@ INSERT INTO Pedidos (FechaPedido, Coste) VALUES
     (GETDATE(), 0.00), -- Otro pedido inicial
     (GETDATE(), 0.00); -- Otro pedido inicial
 
+
+-- Insertar productos con IdProducto comenzando desde 1
+INSERT INTO ProveedoresProductos (IdProveedor, IdProducto, PrecioUnidad)
+VALUES 
+    (1, 1, 25.50),  -- Proveedor 1, Producto 1, Precio 25.50
+    (1, 2, 30.00),  -- Proveedor 1, Producto 2, Precio 30.00
+    (2, 3, 22.75),  -- Proveedor 2, Producto 3, Precio 22.75
+    (3, 4, 35.00);  -- Proveedor 3, Producto 4, Precio 35.00
 
 INSERT INTO ProductosCategorias (IdCategoria, IdProducto) VALUES 
     (1, 1), -- Laptop Gaming en Tecnologia
@@ -165,7 +173,7 @@ BEGIN
     WHERE pc.IdCategoria = @idCategoria;
 END;
 
-CREATE PROCEDURE filtrarProveedoresPorPais
+CREATE or Alter PROCEDURE filtrarProveedoresPorPais
     @Pais NVARCHAR(100)  
 AS
 BEGIN
@@ -176,7 +184,7 @@ BEGIN
     WHERE Pais = @Pais;
 END;
 
-CREATE PROCEDURE crearPedido
+CREATE or Alter PROCEDURE crearPedido
     @lista ListaProductos READONLY,
 	@IdProveedor INT
 AS
@@ -223,33 +231,58 @@ BEGIN
     WHERE p.IdPedido = @IdPedido;
 END;
 
+Exec pedidoCompleto 
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-CREATE OR ALTER PROCEDURE obtenerProveedorPorId
-    @IdProveedor INT
+CREATE OR ALTER PROCEDURE pedidoCompleto
 AS
 BEGIN
-    SET NOCOUNT ON;
-    -- Verificar si el pedido existe
-    IF NOT EXISTS (SELECT 1 FROM Pedidos WHERE IdPedido = @IdPedido)
-    BEGIN
-        RAISERROR('El pedido con IdPedido %d no existe.', 16, 1, @IdPedido);
-        RETURN;
-    END
-
-    -- Eliminar productos existentes del pedido
-    DELETE FROM PedidosProductos WHERE IdPedido = @IdPedido;
-
-    -- Eliminar productos que estan en la lista
-    DELETE FROM PedidosProductos 
-    WHERE IdPedido = @IdPedido AND IdProducto IN (SELECT idProducto FROM @lista);
-
-    -- Devolver el pedido modificado
-    SELECT * FROM Pedidos WHERE IdPedido = @IdPedido;
+    -- Obtener los datos de todos los pedidos, los productos, sus categorías y proveedores
+    SELECT 
+        p.IdPedido, 
+        p.FechaPedido, 
+        p.Coste, 
+        pp.IdProducto, 
+        pr.Nombre, 
+        pp.Cantidad,
+        pp.IdProveedor,  -- Aquí obtenemos el proveedor desde la tabla PedidosProductos
+        c.nombre AS Categoria,
+        c.IdCategoria
+    FROM 
+        Pedidos p
+    JOIN 
+        PedidosProductos pp ON p.IdPedido = pp.IdPedido
+    JOIN 
+        Productos pr ON pp.IdProducto = pr.IdProducto
+    JOIN 
+        ProductosCategorias pc ON pr.IdProducto = pc.IdProducto
+    JOIN 
+        Categorias c ON pc.IdCategoria = c.IdCategoria
+    ORDER BY 
+        p.FechaPedido;
 END;
 
-CREATE TRIGGER trg_AfterInsert_PedidosProductos
+CREATE OR ALTER PROCEDURE ObtenerDetallesProducto
+    @IdProducto INT
+AS
+BEGIN
+    -- Obtener detalles del producto junto con su proveedor y precio unitario
+    SELECT 
+        p.IdProducto, 
+        p.Nombre, 
+		pp.IdProveedor,
+        pp.PrecioUnidad, 
+        pr.Nombre AS NombreProveedor
+    FROM 
+        Productos p
+    JOIN 
+        ProveedoresProductos pp ON p.IdProducto = pp.IdProducto
+    JOIN 
+        Proveedores pr ON pp.IdProveedor = pr.IdProveedor
+    WHERE 
+        p.IdProducto = @IdProducto;
+END;
+
+EXEC ObtenerDetallesProducto @IdProducto = 1;
 
 CREATE OR ALTER TRIGGER trg_AfterInsert_PedidosProductos
 
