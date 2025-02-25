@@ -190,6 +190,7 @@ END;
 
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 CREATE OR ALTER PROCEDURE obtenerProveedorPorId
     @IdProveedor INT
 AS
@@ -203,6 +204,8 @@ END;
 
 
 
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 CREATE TRIGGER trg_AfterInsert_PedidosProductos
