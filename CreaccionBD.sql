@@ -249,47 +249,68 @@ BEGIN
     SELECT * FROM Pedidos WHERE IdPedido = @IdPedido;
 END;
 
-CREATE TRIGGER trg_AfterInsert_PedidosProductos
+CREATE OR ALTER TRIGGER trg_AfterInsert_PedidosProductos
 ON PedidosProductos
 AFTER INSERT
 AS
 BEGIN
+    SET NOCOUNT ON;
     UPDATE p
-    SET p.Coste = ISNULL(p.Coste, 0) + (i.Cantidad * pr.Precio)
+    SET p.Coste = ISNULL(p.Coste, 0) + ISNULL(sub.Total, 0)
     FROM Pedidos p
-    JOIN inserted i ON p.IdPedido = i.IdPedido
-    JOIN Productos pr ON i.IdProducto = pr.IdProducto
+    JOIN (
+        SELECT i.IdPedido, SUM(i.Cantidad * pr.Precio) AS Total
+        FROM inserted i
+        JOIN Productos pr ON i.IdProducto = pr.IdProducto
+        GROUP BY i.IdPedido
+    ) sub ON p.IdPedido = sub.IdPedido;
 END;
 
-CREATE TRIGGER trg_AfterDelete_PedidosProductos
+-- Corrección del trigger de eliminación en PedidosProductos
+CREATE OR ALTER TRIGGER trg_AfterDelete_PedidosProductos
 ON PedidosProductos
 AFTER DELETE
 AS
 BEGIN
+    SET NOCOUNT ON;
+    
     UPDATE p
-    SET p.Coste = ISNULL(p.Coste, 0) - (d.Cantidad * pr.Precio)
+    SET p.Coste = ISNULL(p.Coste, 0) - ISNULL(sub.Total, 0)
     FROM Pedidos p
-    JOIN deleted d ON p.IdPedido = d.IdPedido
-    JOIN Productos pr ON d.IdProducto = pr.IdProducto;
+    JOIN (
+        SELECT d.IdPedido, SUM(d.Cantidad * pr.Precio) AS Total
+        FROM deleted d
+        JOIN Productos pr ON d.IdProducto = pr.IdProducto
+        GROUP BY d.IdPedido
+    ) sub ON p.IdPedido = sub.IdPedido;
 END;
 
-CREATE TRIGGER trg_AfterUpdate_PedidosProductos
+-- Corrección del trigger de actualización en PedidosProductos
+CREATE OR ALTER TRIGGER trg_AfterUpdate_PedidosProductos
 ON PedidosProductos
 AFTER UPDATE
 AS
 BEGIN
-    -- Actualizar el coste en caso de que la cantidad cambie
+    SET NOCOUNT ON;
+    
     UPDATE p
     SET p.Coste = ISNULL(p.Coste, 0) 
-                  + (i.Cantidad * pr.Precio) 
-                  - (d.Cantidad * pr2.Precio)
+                  - ISNULL(sub_old.Total, 0) 
+                  + ISNULL(sub_new.Total, 0)
     FROM Pedidos p
-    JOIN inserted i ON p.IdPedido = i.IdPedido
-    JOIN deleted d ON p.IdPedido = d.IdPedido
-    JOIN Productos pr ON i.IdProducto = pr.IdProducto
-    JOIN Productos pr2 ON d.IdProducto = pr2.IdProducto;
+    LEFT JOIN (
+        SELECT d.IdPedido, SUM(d.Cantidad * pr.Precio) AS Total
+        FROM deleted d
+        JOIN Productos pr ON d.IdProducto = pr.IdProducto
+        GROUP BY d.IdPedido
+    ) sub_old ON p.IdPedido = sub_old.IdPedido
+    LEFT JOIN (
+        SELECT i.IdPedido, SUM(i.Cantidad * pr.Precio) AS Total
+        FROM inserted i
+        JOIN Productos pr ON i.IdProducto = pr.IdProducto
+        GROUP BY i.IdPedido
+    ) sub_new ON p.IdPedido = sub_new.IdPedido;
 END;
-
 
 CREATE OR ALTER TRIGGER trg_AfterInsert_AfterUpdate_Pedidos
 ON Pedidos
@@ -309,4 +330,3 @@ BEGIN
         RETURN;
     END
 END;
-
