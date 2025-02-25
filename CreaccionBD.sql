@@ -10,6 +10,7 @@ CREATE TABLE ProductosCategorias (
         REFERENCES Productos(IdProducto)
 );
 
+
 CREATE TABLE Pedidos (
     IdPedido INT IDENTITY(1,1),
     FechaPedido DateTime NOT NULL,
@@ -92,6 +93,7 @@ INSERT INTO Categorias (nombre) VALUES
     ('Automoviles y Accesorios'),
     ('Oficina y Papeleria');
 
+
 INSERT INTO Productos (Nombre, Precio, IdCategoria) VALUES 
     ('Laptop Gaming', 1200.00, 1), -- Tecnologia
     ('Camiseta de Algodon', 20.00, 2), -- Ropa y Accesorios
@@ -104,10 +106,12 @@ INSERT INTO Productos (Nombre, Precio, IdCategoria) VALUES
     ('Bicicleta', 300.00, 9), -- Automoviles y Accesorios
     ('Impresora', 150.00, 10); -- Oficina y Papeleria
 
+
 INSERT INTO Pedidos (FechaPedido, Coste) VALUES 
     (GETDATE(), 0.00), -- Pedido inicial con coste 0
     (GETDATE(), 0.00), -- Otro pedido inicial
     (GETDATE(), 0.00); -- Otro pedido inicial
+
 
 INSERT INTO ProductosCategorias (IdCategoria, IdProducto) VALUES 
     (1, 1), -- Laptop Gaming en Tecnologia
@@ -121,11 +125,13 @@ INSERT INTO ProductosCategorias (IdCategoria, IdProducto) VALUES
     (9, 9), -- Bicicleta en Automoviles y Accesorios
     (10, 10); -- Impresora en Oficina y Papeleria
 
+
 INSERT INTO PedidosProductos (IdPedido, IdProducto, Cantidad) VALUES 
     (1, 1, 1), -- 1 Laptop Gaming en el pedido 1
     (1, 2, 2), -- 2 Camisetas de Algodon en el pedido 1
     (2, 3, 1), -- 1 Sofa Moderno en el pedido 2
     (2, 4, 1); -- 1 Refrigerador en el pedido 2
+
 
 CREATE OR ALTER PROCEDURE filtrarPedidosPorProducto
     @idProducto INT
@@ -137,6 +143,7 @@ BEGIN
     WHERE PP.IdProducto = @idProducto;
 END;
 
+
 CREATE OR ALTER PROCEDURE filtrarPedidosPorFechas
     @fechaInicio DATETIME,
     @fechaFin DATETIME
@@ -146,6 +153,7 @@ BEGIN
     FROM Pedidos
     WHERE FechaPedido BETWEEN @fechaInicio AND @fechaFin;
 END;
+
 
 CREATE OR ALTER PROCEDURE filtrarProductosPorCategoria
     @idCategoria INT
@@ -179,7 +187,7 @@ BEGIN
     INSERT INTO Pedidos (FechaPedido, IdProveedor)
     VALUES (GETDATE(), @IdProveedor);
 
-    -- Obtener el ID del pedido recién creado
+    -- Obtener el ID del pedido reciï¿½n creado
     SET @NuevoPedidoId = SCOPE_IDENTITY();
 
     -- Insertar los productos en la tabla PedidosProductos con cantidad predeterminada (ejemplo: 1)
@@ -195,10 +203,34 @@ END;
 CREATE PROCEDURE modificarPedido
     @IdPedido INT,
     @lista ListaProductos READONLY
+
+CREATE OR ALTER PROCEDURE filtrarPedidosConDatosDelProducto
+    @IdPedido INT
 AS
 BEGIN
     SET NOCOUNT ON;
 
+    SELECT 
+        p.IdPedido,
+        p.FechaPedido,
+        p.Coste,
+        pr.IdProducto,
+        pr.Nombre AS NombreProducto,
+        pr.Precio AS PrecioUnitario,
+        pp.Cantidad,
+        (pr.Precio * pp.Cantidad) AS Subtotal
+    FROM Pedidos p
+    LEFT JOIN PedidosProductos pp ON p.IdPedido = pp.IdPedido
+    LEFT JOIN Productos pr ON pp.IdProducto = pr.IdProducto
+    WHERE p.IdPedido = @IdPedido;
+END;
+
+
+CREATE OR ALTER PROCEDURE obtenerProveedorPorId
+    @IdProveedor INT
+AS
+BEGIN
+    SET NOCOUNT ON;
     -- Verificar si el pedido existe
     IF NOT EXISTS (SELECT 1 FROM Pedidos WHERE IdPedido = @IdPedido)
     BEGIN
@@ -209,7 +241,7 @@ BEGIN
     -- Eliminar productos existentes del pedido
     DELETE FROM PedidosProductos WHERE IdPedido = @IdPedido;
 
-    -- Eliminar productos que están en la lista
+    -- Eliminar productos que estan en la lista
     DELETE FROM PedidosProductos 
     WHERE IdPedido = @IdPedido AND IdProducto IN (SELECT idProducto FROM @lista);
 
@@ -257,3 +289,24 @@ BEGIN
     JOIN Productos pr ON i.IdProducto = pr.IdProducto
     JOIN Productos pr2 ON d.IdProducto = pr2.IdProducto;
 END;
+
+
+CREATE OR ALTER TRIGGER trg_AfterInsert_AfterUpdate_Pedidos
+ON Pedidos
+AFTER INSERT, UPDATE
+AS
+BEGIN
+    -- Si se intenta insertar o actualizar manualmente 'Coste', se bloquea
+    IF EXISTS (
+        SELECT 1 
+        FROM inserted i
+        JOIN deleted d ON i.IdPedido = d.IdPedido -- Para UPDATE
+        WHERE i.Coste <> d.Coste OR i.Coste IS NOT NULL
+    )
+    BEGIN
+        RAISERROR ('No puedes insertar ni modificar el campo Coste manualmente.', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+END;
+
