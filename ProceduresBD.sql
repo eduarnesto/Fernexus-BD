@@ -5,7 +5,9 @@ BEGIN
     SELECT * 
     FROM Pedidos P
     INNER JOIN PedidosProductos PP ON PP.IdPedido = P.IdPedido
-    WHERE PP.IdProducto = @idProducto;
+    WHERE PP.IdProducto = @idProducto
+      AND P.deletedat = '1111-11-11'
+      AND PP.deletedat = '1111-11-11';
 END;
 
 CREATE OR ALTER PROCEDURE filtrarPedidosPorFechas
@@ -15,7 +17,8 @@ AS
 BEGIN
     SELECT *
     FROM Pedidos
-    WHERE FechaPedido BETWEEN @fechaInicio AND @fechaFin;
+    WHERE FechaPedido BETWEEN @fechaInicio AND @fechaFin
+      AND deletedat = '1111-11-11';
 END;
 
 CREATE OR ALTER PROCEDURE filtrarProductosPorCategoria
@@ -25,10 +28,12 @@ BEGIN
     SELECT p.*
     FROM Productos p
     INNER JOIN ProductosCategorias pc ON p.IdProducto = pc.IdProducto
-    WHERE pc.IdCategoria = @idCategoria;
+    WHERE pc.IdCategoria = @idCategoria
+      AND p.deletedat = '1111-11-11'
+      AND pc.deletedat = '1111-11-11';
 END;
 
-CREATE or Alter PROCEDURE filtrarProveedoresPorPais
+CREATE OR ALTER PROCEDURE filtrarProveedoresPorPais
     @Pais NVARCHAR(100)  
 AS
 BEGIN
@@ -36,15 +41,16 @@ BEGIN
     
     SELECT * 
     FROM Proveedores
-    WHERE Pais = @Pais;
+    WHERE Pais = @Pais
+      AND deletedat = '1111-11-11';
 END;
 
-CREATE or Alter PROCEDURE crearPedido
+CREATE OR ALTER PROCEDURE crearPedido
     @lista ListaProductos READONLY,
-	@IdProveedor INT
+    @IdProveedor INT
 AS
 BEGIN
-	DECLARE @NuevoPedidoId INT;
+    DECLARE @NuevoPedidoId INT;
 
     INSERT INTO Pedidos (FechaPedido, IdProveedor)
     VALUES (GETDATE(), @IdProveedor);
@@ -54,9 +60,12 @@ BEGIN
     INSERT INTO PedidosProductos (IdPedido, IdProducto, Cantidad)
     SELECT @NuevoPedidoId, lp.idProducto, COUNT(*)
     FROM @lista lp
-	GROUP BY lp.idProducto;
+    GROUP BY lp.idProducto;
 
-    SELECT * from Pedidos as P where P.IdPedido = @NuevoPedidoId;
+    SELECT * 
+    FROM Pedidos as P 
+    WHERE P.IdPedido = @NuevoPedidoId
+      AND P.deletedat = '1111-11-11';
 END;
 
 CREATE OR ALTER PROCEDURE filtrarPedidosConDatosDelProducto
@@ -75,7 +84,10 @@ BEGIN
     FROM Pedidos p
     LEFT JOIN PedidosProductos pp ON p.IdPedido = pp.IdPedido
     LEFT JOIN Productos pr ON pp.IdProducto = pr.IdProducto
-    WHERE p.IdPedido = @IdPedido;
+    WHERE p.IdPedido = @IdPedido
+      AND p.deletedat = '1111-11-11'
+      AND pp.deletedat = '1111-11-11'
+      AND pr.deletedat = '1111-11-11';
 END;
 
 CREATE OR ALTER PROCEDURE pedidoCompleto
@@ -85,11 +97,11 @@ BEGIN
         p.IdPedido, 
         p.FechaPedido, 
         pp.IdProducto, 
-		pp.IdProveedor,
+        pp.IdProveedor,
         pr.Nombre, 
-		pc.IdCategoria,
+        pc.IdCategoria,
         pp.Cantidad,
-		prp.PrecioUnidad * pp.Cantidad as PrecioTotal
+        prp.PrecioUnidad * pp.Cantidad as PrecioTotal
     FROM 
         Pedidos p
     JOIN 
@@ -100,10 +112,13 @@ BEGIN
         ProductosCategorias pc ON pr.IdProducto = pc.IdProducto
     JOIN 
         Categorias c ON pc.IdCategoria = c.IdCategoria
-	JOIN
-		ProveedoresProductos prp ON prp.IdProducto = pp.IdProducto and prp.IdProveedor = p.IdProveedor
-    ORDER BY 
-        p.FechaPedido;
+    JOIN
+        ProveedoresProductos prp ON prp.IdProducto = pp.IdProducto AND prp.IdProveedor = p.IdProveedor
+    WHERE 
+        p.deletedat = '1111-11-11'
+        AND pp.deletedat = '1111-11-11'
+        AND pr.deletedat = '1111-11-11'
+        AND pc.deletedat = '1111-11-11';
 END;
 
 CREATE OR ALTER PROCEDURE ObtenerDetallesProducto
@@ -113,7 +128,7 @@ BEGIN
     SELECT 
         p.IdProducto, 
         p.Nombre, 
-		pp.IdProveedor,
+        pp.IdProveedor,
         pp.PrecioUnidad, 
         pr.Nombre AS NombreProveedor
     FROM 
@@ -123,5 +138,8 @@ BEGIN
     JOIN 
         Proveedores pr ON pp.IdProveedor = pr.IdProveedor
     WHERE 
-        p.IdProducto = @IdProducto;
+        p.IdProducto = @IdProducto
+      AND p.deletedat = '1111-11-11'
+      AND pp.deletedat = '1111-11-11'
+      AND pr.deletedat = '1111-11-11';
 END;
