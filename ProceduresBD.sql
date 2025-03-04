@@ -103,22 +103,44 @@ CREATE OR ALTER PROCEDURE crearPedido
     @lista ListaProductos READONLY
 AS
 BEGIN
+    SET NOCOUNT ON;
     DECLARE @NuevoPedidoId INT;
+    DECLARE @IdProveedor INT;
 
-    INSERT INTO Pedidos (FechaPedido, IdProveedor)
-    VALUES (GETDATE(), (SELECT lp.idProveedor FROM @lista lp));
+    -- Validar que todos los productos tengan el mismo proveedor
+    SELECT @IdProveedor = MIN(idProveedor) FROM @lista;
+    IF (SELECT COUNT(DISTINCT idProveedor) FROM @lista) > 1
+    BEGIN
+        RAISERROR('Todos los productos deben pertenecer al mismo proveedor.', 16, 1);
+        RETURN;
+    END;
 
-    SET @NuevoPedidoId = SCOPE_IDENTITY();
+    BEGIN TRY
+        BEGIN TRANSACTION;
 
-    INSERT INTO PedidosProductos (IdPedido, IdProducto, Cantidad)
-    SELECT @NuevoPedidoId, lp.idProducto, lp.cantidad
-    FROM @lista lp
-    GROUP BY lp.idProducto, lp.cantidad;
+        -- Insertar Pedido
+        INSERT INTO Pedidos (FechaPedido, IdProveedor)
+        VALUES (GETDATE(), @IdProveedor);
 
-    SELECT * 
-    FROM Pedidos as P 
-    WHERE P.IdPedido = @NuevoPedidoId
-      AND P.deletedat = '1111-11-11';
+        SET @NuevoPedidoId = SCOPE_IDENTITY();
+
+        -- Insertar Productos (sin GROUP BY innecesario)
+        INSERT INTO PedidosProductos (IdPedido, IdProducto, Cantidad)
+        SELECT @NuevoPedidoId, idProducto, cantidad
+        FROM @lista;
+
+        COMMIT TRANSACTION;
+
+        -- Retornar el pedido creado (asumiendo que deletedat es un soft delete)
+        SELECT * 
+        FROM Pedidos 
+        WHERE IdPedido = @NuevoPedidoId
+          AND deletedat = '1111-11-11';
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
+        THROW; -- Propagar el error
+    END CATCH;
 END;
 
 CREATE OR ALTER PROCEDURE filtrarPedidosConDatosDelProducto

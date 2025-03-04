@@ -29,7 +29,7 @@ CREATE TABLE Proveedores (
     CONSTRAINT PK_Proveedores PRIMARY KEY (IdProveedor)
 );
 
--- Crear la tabla ProductosCategorias
+-- Crear la tabla ProductosCategorias (ON DELETE CASCADE en ambas claves)
 CREATE TABLE ProductosCategorias (
     IdCategoria INT,
     IdProducto INT,
@@ -37,11 +37,13 @@ CREATE TABLE ProductosCategorias (
     Precio FLOAT NOT NULL,
     DeletedAt DATE DEFAULT '1111-11-11',
     CONSTRAINT PK_ProductosCategorias PRIMARY KEY (IdCategoria, IdProducto),
-    CONSTRAINT FK_ProductosCategorias_Categoria FOREIGN KEY (IdCategoria) REFERENCES Categorias(IdCategoria),
-    CONSTRAINT FK_ProductosCategorias_Producto FOREIGN KEY (IdProducto) REFERENCES Productos(IdProducto)
+    CONSTRAINT FK_ProductosCategorias_Categoria 
+        FOREIGN KEY (IdCategoria) REFERENCES Categorias(IdCategoria) ON DELETE CASCADE,
+    CONSTRAINT FK_ProductosCategorias_Producto 
+        FOREIGN KEY (IdProducto) REFERENCES Productos(IdProducto) ON DELETE CASCADE
 );
 
--- Crear la tabla Pedidos
+-- Crear la tabla Pedidos (ON DELETE CASCADE en IdProveedor)
 CREATE TABLE Pedidos (
     IdPedido INT IDENTITY(1,1),
     FechaPedido DATETIME NOT NULL,
@@ -49,27 +51,32 @@ CREATE TABLE Pedidos (
     IdProveedor INT,
     DeletedAt DATE DEFAULT '1111-11-11',
     CONSTRAINT PK_Pedidos PRIMARY KEY (IdPedido),
-    CONSTRAINT FK_Pedidos_Proveedores FOREIGN KEY (IdProveedor) REFERENCES Proveedores(IdProveedor)
+    CONSTRAINT FK_Pedidos_Proveedores 
+        FOREIGN KEY (IdProveedor) REFERENCES Proveedores(IdProveedor) ON DELETE CASCADE
 );
 
--- Crear la tabla PedidosProductos
+-- Crear la tabla PedidosProductos (ON DELETE CASCADE en ambas claves)
 CREATE TABLE PedidosProductos (
     IdPedido INT,
     IdProducto INT,
     Cantidad INT,
     DeletedAt DATE DEFAULT '1111-11-11',
     PRIMARY KEY (IdPedido, IdProducto),
-    CONSTRAINT FK_PedidosProductos_Pedido FOREIGN KEY (IdPedido) REFERENCES Pedidos(IdPedido),
-    CONSTRAINT FK_PedidosProductos_Producto FOREIGN KEY (IdProducto) REFERENCES Productos(IdProducto) 
+    CONSTRAINT FK_PedidosProductos_Pedido 
+        FOREIGN KEY (IdPedido) REFERENCES Pedidos(IdPedido) ON DELETE CASCADE,
+    CONSTRAINT FK_PedidosProductos_Producto 
+        FOREIGN KEY (IdProducto) REFERENCES Productos(IdProducto) ON DELETE CASCADE
 );
 
--- Crear la tabla ProveedoresProductos
+-- Crear la tabla ProveedoresProductos (ON DELETE CASCADE en ambas claves)
 CREATE TABLE ProveedoresProductos (
     IdProveedor INT,
     IdProducto INT,
     PrecioUnidad DECIMAL(10,2),
     DeletedAt DATE DEFAULT '1111-11-11',
     CONSTRAINT PK_ProveedoresProductos PRIMARY KEY (IdProveedor, IdProducto),
-    CONSTRAINT FK_ProveedoresProductos_Proveedores FOREIGN KEY (IdProveedor) REFERENCES Proveedores(IdProveedor),
-    CONSTRAINT FK_ProveedoresProductos_Productos FOREIGN KEY (IdProducto) REFERENCES Productos(IdProducto)
+    CONSTRAINT FK_ProveedoresProductos_Proveedores 
+        FOREIGN KEY (IdProveedor) REFERENCES Proveedores(IdProveedor) ON DELETE CASCADE,
+    CONSTRAINT FK_ProveedoresProductos_Productos 
+        FOREIGN KEY (IdProducto) REFERENCES Productos(IdProducto) ON DELETE CASCADE
 );
