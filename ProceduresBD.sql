@@ -1,4 +1,3 @@
-
 CREATE OR ALTER PROCEDURE filtrarPedidosPorProducto
     @idProducto INT
 AS
@@ -18,7 +17,6 @@ BEGIN
     FROM Pedidos
     WHERE FechaPedido BETWEEN @fechaInicio AND @fechaFin;
 END;
-
 
 CREATE OR ALTER PROCEDURE filtrarProductosPorCategoria
     @idCategoria INT
@@ -86,13 +84,12 @@ BEGIN
     SELECT 
         p.IdPedido, 
         p.FechaPedido, 
-        p.Coste, 
         pp.IdProducto, 
+		pp.IdProveedor,
         pr.Nombre, 
+		pc.IdCategoria,
         pp.Cantidad,
-        pp.IdProveedor,
-        c.nombre AS Categoria,
-        c.IdCategoria
+		prp.PrecioUnidad * pp.Cantidad as PrecioTotal
     FROM 
         Pedidos p
     JOIN 
@@ -103,6 +100,8 @@ BEGIN
         ProductosCategorias pc ON pr.IdProducto = pc.IdProducto
     JOIN 
         Categorias c ON pc.IdCategoria = c.IdCategoria
+	JOIN
+		ProveedoresProductos prp ON prp.IdProducto = pp.IdProducto and prp.IdProveedor = p.IdProveedor
     ORDER BY 
         p.FechaPedido;
 END;
