@@ -15,10 +15,6 @@ CREATE OR ALTER PROCEDURE filtrarPedidosPorFechas
     @fechaFin DATETIME
 AS
 BEGIN
-    SELECT *
-    FROM Pedidos
-    WHERE FechaPedido BETWEEN @fechaInicio AND @fechaFin
-      AND deletedat = '1111-11-11';
     SELECT 
         p.IdPedido, 
         p.FechaPedido, 
