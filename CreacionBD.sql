@@ -1,5 +1,5 @@
 -- Crear el tipo de datos
-CREATE TYPE ListaProductos AS TABLE (idProducto INT, idProveedor INT);
+CREATE TYPE ListaProductos AS TABLE (idProducto INT, idProveedor INT, cantidad INT);
 
 -- Crear la tabla Categorias
 CREATE TABLE Categorias (

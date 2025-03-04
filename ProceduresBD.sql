@@ -100,21 +100,20 @@ BEGIN
 END;
 
 CREATE OR ALTER PROCEDURE crearPedido
-    @lista ListaProductos READONLY,
-    @IdProveedor INT
+    @lista ListaProductos READONLY
 AS
 BEGIN
     DECLARE @NuevoPedidoId INT;
 
     INSERT INTO Pedidos (FechaPedido, IdProveedor)
-    VALUES (GETDATE(), @IdProveedor);
+    VALUES (GETDATE(), (SELECT lp.idProveedor FROM @lista lp));
 
     SET @NuevoPedidoId = SCOPE_IDENTITY();
 
     INSERT INTO PedidosProductos (IdPedido, IdProducto, Cantidad)
-    SELECT @NuevoPedidoId, lp.idProducto, COUNT(*)
+    SELECT @NuevoPedidoId, lp.idProducto, lp.cantidad
     FROM @lista lp
-    GROUP BY lp.idProducto;
+    GROUP BY lp.idProducto, lp.cantidad;
 
     SELECT * 
     FROM Pedidos as P 
