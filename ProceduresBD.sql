@@ -122,6 +122,7 @@ BEGIN
         pp.IdProveedor,
         pr.Nombre, 
         pc.IdCategoria,
+		prp.PrecioUnidad,
         pp.Cantidad,
         prp.PrecioUnidad * pp.Cantidad as PrecioTotal
     FROM 
