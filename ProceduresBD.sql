@@ -43,6 +43,38 @@ BEGIN
         AND pc.deletedat = '1111-11-11';
 END;
 
+CREATE OR ALTER PROCEDURE filtrarPedidosPorIdProducto
+    @idProducto
+AS
+BEGIN
+    SELECT 
+        p.IdPedido, 
+        p.FechaPedido, 
+        pp.IdProducto, 
+        prp.IdProveedor,
+        pr.Nombre, 
+        pc.IdCategoria,
+        pp.Cantidad,
+        prp.PrecioUnidad * pp.Cantidad as PrecioTotal
+    FROM 
+        Pedidos p
+    JOIN 
+        PedidosProductos pp ON p.IdPedido = pp.IdPedido
+    JOIN 
+        Productos pr ON pp.IdProducto = pr.IdProducto
+    JOIN 
+        ProductosCategorias pc ON pr.IdProducto = pc.IdProducto
+    JOIN 
+        Categorias c ON pc.IdCategoria = c.IdCategoria
+    JOIN
+        ProveedoresProductos prp ON prp.IdProducto = pp.IdProducto AND prp.IdProveedor = p.IdProveedor
+    WHERE pp.IdProducto = @idProducto
+        AND p.deletedat = '1111-11-11'
+        AND pp.deletedat = '1111-11-11'
+        AND pr.deletedat = '1111-11-11'
+        AND pc.deletedat = '1111-11-11';
+END;
+
 CREATE OR ALTER PROCEDURE filtrarProductosPorCategoria
     @idCategoria INT
 AS
