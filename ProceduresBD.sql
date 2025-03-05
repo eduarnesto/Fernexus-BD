@@ -1,15 +1,3 @@
-CREATE OR ALTER PROCEDURE filtrarPedidosPorProducto
-    @idProducto INT
-AS
-BEGIN
-    SELECT * 
-    FROM Pedidos P
-    INNER JOIN PedidosProductos PP ON PP.IdPedido = P.IdPedido
-    WHERE PP.IdProducto = @idProducto
-      AND P.deletedat = '1111-11-11'
-      AND PP.deletedat = '1111-11-11';
-END;
-
 CREATE OR ALTER PROCEDURE filtrarPedidosPorFechas
     @fechaInicio DATETIME,
     @fechaFin DATETIME
@@ -43,8 +31,8 @@ BEGIN
         AND pc.deletedat = '1111-11-11';
 END;
 
-CREATE OR ALTER PROCEDURE filtrarPedidosPorIdProducto
-    @idProducto
+CREATE OR ALTER PROCEDURE filtrarPedidosPorProducto
+    @idProducto INT
 AS
 BEGIN
     SELECT 
@@ -52,7 +40,8 @@ BEGIN
         p.FechaPedido, 
         pp.IdProducto, 
         prp.IdProveedor,
-        pr.Nombre, 
+        pr.Nombre,
+		prp.PrecioUnidad,
         pc.IdCategoria,
         pp.Cantidad,
         prp.PrecioUnidad * pp.Cantidad as PrecioTotal
@@ -140,6 +129,38 @@ BEGIN
     BEGIN CATCH
         IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
         THROW; -- Propagar el error
+    END CATCH;
+END;
+
+CREATE OR ALTER PROCEDURE modificarPedido
+    @IdPedido INT,
+    @lista ListaProductos READONLY
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        BEGIN TRANSACTION;
+
+        -- Eliminar productos actuales del pedido
+        DELETE FROM PedidosProductos
+        WHERE IdPedido = @IdPedido;
+
+        -- Insertar nuevos productos
+        INSERT INTO PedidosProductos (IdPedido, IdProducto, Cantidad)
+        SELECT @IdPedido, idProducto, cantidad
+        FROM @lista;
+
+        COMMIT TRANSACTION;
+
+        -- Retornar el pedido actualizado
+        SELECT * 
+        FROM Pedidos 
+        WHERE IdPedido = @IdPedido
+          AND deletedat = '1111-11-11';
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
+        THROW;
     END CATCH;
 END;
 
