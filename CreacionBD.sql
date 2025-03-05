@@ -80,3 +80,4 @@ CREATE TABLE ProveedoresProductos (
     CONSTRAINT FK_ProveedoresProductos_Productos 
         FOREIGN KEY (IdProducto) REFERENCES Productos(IdProducto) ON DELETE CASCADE
 );
+

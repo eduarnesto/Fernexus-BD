@@ -222,3 +222,23 @@ BEGIN
       AND pp.deletedat = '1111-11-11'
       AND pr.deletedat = '1111-11-11';
 END;
+
+CREATE PROCEDURE modificarPedido
+    @idCategoria INT -- El identificador de la categoría cuyos productos se eliminarán de los pedidos
+AS
+BEGIN
+    -- Verificar si la categoría existe
+    IF NOT EXISTS (SELECT 1 FROM Categorias WHERE IdCategoria = @idCategoria)
+    BEGIN
+        RAISERROR('La categoría no existe.', 16, 1);
+        RETURN;
+    END
+
+    -- Eliminar todos los productos asociados a la categoría en los pedidos
+    DELETE FROM PedidosProductos
+    WHERE IdProducto IN (SELECT IdProducto FROM ProductosCategorias WHERE IdCategoria = @idCategoria)
+    AND DeletedAt = '1111-11-11';
+
+    -- Confirmar eliminación
+    PRINT 'Productos asociados a la categoría han sido eliminados de los pedidos.';
+END;
