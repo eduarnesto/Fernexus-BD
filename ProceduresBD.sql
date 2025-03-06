@@ -72,9 +72,10 @@ CREATE OR ALTER PROCEDURE filtrarProductosPorCategoria
     @idCategoria INT
 AS
 BEGIN
-    SELECT p.*
+    SELECT p.*, pp.PrecioUnidad, pp.Stock
     FROM Productos p
     INNER JOIN ProductosCategorias pc ON p.IdProducto = pc.IdProducto
+	INNER JOIN ProveedoresProductos pp ON p.IdProducto = pp.IdProducto
     WHERE pc.IdCategoria = @idCategoria
       AND p.deletedat = '1111-11-11'
       AND pc.deletedat = '1111-11-11';
