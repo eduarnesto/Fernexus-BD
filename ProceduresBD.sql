@@ -32,7 +32,10 @@ BEGIN
         AND pc.deletedat = '1111-11-11';
 END;
 
+DECLARE @fechaInicio DATETIME = '2025-03-05',  
+        @fechaFin DATETIME = '2025-03-06';  
 
+EXEC filtrarPedidosPorFechas @fechaInicio, @fechaFin;
 
 CREATE OR ALTER PROCEDURE filtrarPedidosPorProducto
     @idProducto INT
@@ -73,7 +76,7 @@ CREATE OR ALTER PROCEDURE filtrarProductosPorCategoria
     @idCategoria INT
 AS
 BEGIN
-    SELECT p.*, pp.PrecioUnidad, pp.Stock
+    SELECT p.*, pp.PrecioUnidad, pp.Stock, pp.IdProveedor
     FROM Productos p
     INNER JOIN ProductosCategorias pc ON p.IdProducto = pc.IdProducto
 	INNER JOIN ProveedoresProductos pp ON p.IdProducto = pp.IdProducto
@@ -146,12 +149,25 @@ END;
 
 CREATE OR ALTER PROCEDURE modificarPedido
     @IdPedido INT,
-    @lista ListaProductos READONLY
+    @lista ListaProductos READONLY,
+    @Resultado INT OUTPUT
 AS
 BEGIN
     SET NOCOUNT ON;
     BEGIN TRY
         BEGIN TRANSACTION;
+
+        -- Verificar si el pedido existe y no está eliminado
+        IF NOT EXISTS (
+            SELECT 1 FROM Pedidos 
+            WHERE IdPedido = @IdPedido 
+              AND deletedat = '1111-11-11'
+        )
+        BEGIN
+            SET @Resultado = -1; -- Código para indicar que el pedido no existe
+            ROLLBACK TRANSACTION;
+            RETURN;
+        END
 
         -- Eliminar productos actuales del pedido
         DELETE FROM PedidosProductos
@@ -163,16 +179,11 @@ BEGIN
         FROM @lista;
 
         COMMIT TRANSACTION;
-
-        -- Retornar el pedido actualizado
-        SELECT * 
-        FROM Pedidos 
-        WHERE IdPedido = @IdPedido
-          AND deletedat = '1111-11-11';
+        SET @Resultado = 1; -- Código para indicar éxito
     END TRY
     BEGIN CATCH
         IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-        RETURN NULL
+        SET @Resultado = 0; -- Código para indicar error
     END CATCH;
 END;
 
