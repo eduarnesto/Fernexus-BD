@@ -8,7 +8,8 @@ BEGIN
         p.FechaPedido, 
         pp.IdProducto, 
         prp.IdProveedor,
-        pr.Nombre, 
+        pr.Nombre,
+		prp.PrecioUnidad,
         pc.IdCategoria,
         pp.Cantidad,
         prp.PrecioUnidad * pp.Cantidad as PrecioTotal
