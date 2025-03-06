@@ -30,5 +30,3 @@ INSERT INTO PedidosProductos (IdPedido, IdProducto, Cantidad) VALUES (5, 3, 5);
 INSERT INTO ProveedoresProductos (IdProveedor, IdProducto, PrecioUnidad) VALUES (1, 1, 450.00);
 INSERT INTO ProveedoresProductos (IdProveedor, IdProducto, PrecioUnidad) VALUES (2, 2, 280.00);
 INSERT INTO ProveedoresProductos (IdProveedor, IdProducto, PrecioUnidad) VALUES (1, 3, 15.00);
-
-Select * from Pedidos

@@ -31,6 +31,8 @@ BEGIN
         AND pc.deletedat = '1111-11-11';
 END;
 
+
+
 CREATE OR ALTER PROCEDURE filtrarPedidosPorProducto
     @idProducto INT
 AS
@@ -64,6 +66,8 @@ BEGIN
         AND pc.deletedat = '1111-11-11';
 END;
 
+
+
 CREATE OR ALTER PROCEDURE filtrarProductosPorCategoria
     @idCategoria INT
 AS
@@ -76,6 +80,8 @@ BEGIN
       AND pc.deletedat = '1111-11-11';
 END;
 
+--exec filtrarProductosPorCategoria 1
+
 CREATE OR ALTER PROCEDURE filtrarProveedoresPorPais
     @Pais NVARCHAR(100)  
 AS
@@ -87,6 +93,8 @@ BEGIN
     WHERE Pais = @Pais
       AND deletedat = '1111-11-11';
 END;
+
+
 
 CREATE OR ALTER PROCEDURE crearPedido
     @lista ListaProductos READONLY
@@ -132,6 +140,8 @@ BEGIN
     END CATCH;
 END;
 
+
+
 CREATE OR ALTER PROCEDURE modificarPedido
     @IdPedido INT,
     @lista ListaProductos READONLY
@@ -160,9 +170,11 @@ BEGIN
     END TRY
     BEGIN CATCH
         IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-        THROW;
+        RETURN NULL
     END CATCH;
 END;
+
+
 
 CREATE OR ALTER PROCEDURE filtrarPedidosConDatosDelProducto
     @IdPedido INT
@@ -185,6 +197,8 @@ BEGIN
       AND pp.deletedat = '1111-11-11'
       AND pr.deletedat = '1111-11-11';
 END;
+
+
 
 CREATE OR ALTER PROCEDURE pedidoCompleto
 AS
@@ -220,6 +234,8 @@ BEGIN
         AND pr.deletedat = '1111-11-11'
         AND pc.deletedat = '1111-11-11';
 END;
+
+
 
 CREATE OR ALTER PROCEDURE ObtenerDetallesProducto
     @IdProducto INT
