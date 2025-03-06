@@ -212,7 +212,6 @@ BEGIN
         pr.Nombre, 
         pc.IdCategoria,
         prp.IdProveedor,
-        pr.Nombre, 
         pc.IdCategoria,
 		prp.PrecioUnidad,
         pp.Cantidad,
