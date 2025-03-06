@@ -33,8 +33,6 @@ CREATE TABLE Proveedores (
 CREATE TABLE ProductosCategorias (
     IdCategoria INT,
     IdProducto INT,
-    Stock INT,
-    Precio FLOAT NOT NULL,
     DeletedAt DATE DEFAULT '1111-11-11',
     CONSTRAINT PK_ProductosCategorias PRIMARY KEY (IdCategoria, IdProducto),
     CONSTRAINT FK_ProductosCategorias_Categoria 
@@ -73,6 +71,7 @@ CREATE TABLE ProveedoresProductos (
     IdProveedor INT,
     IdProducto INT,
     PrecioUnidad DECIMAL(10,2),
+	Stock INT,
     DeletedAt DATE DEFAULT '1111-11-11',
     CONSTRAINT PK_ProveedoresProductos PRIMARY KEY (IdProveedor, IdProducto),
     CONSTRAINT FK_ProveedoresProductos_Proveedores 
