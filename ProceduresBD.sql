@@ -25,7 +25,7 @@ BEGIN
         Categorias c ON pc.IdCategoria = c.IdCategoria
     JOIN
         ProveedoresProductos prp ON prp.IdProducto = pp.IdProducto AND prp.IdProveedor = p.IdProveedor
-    WHERE FechaPedido >= @fechaInicio AND FechaPedido <= @fechaFin
+    WHERE FechaPedido >= @fechaInicio AND FechaPedido <= DATEADD(DAY, 1, @fechaFin)
         AND p.deletedat = '1111-11-11'
         AND pp.deletedat = '1111-11-11'
         AND pr.deletedat = '1111-11-11'
