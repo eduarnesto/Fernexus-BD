@@ -7,10 +7,16 @@ BEGIN
         p.IdPedido, 
         p.FechaPedido, 
         pp.IdProducto, 
-        prp.IdProveedor,
-        pr.Nombre,
+        pr.Nombre, 
+        pro.IdProveedor,
+		pro.Nombre as 'NombreProveedor',
+		pro.Correo,
+		pro.Telefono,
+		pro.Direccion,
+		pro.Pais,
+		c.IdCategoria,
+		c.Nombre as 'NombreCategoria',
 		prp.PrecioUnidad,
-        pc.IdCategoria,
         pp.Cantidad,
         prp.PrecioUnidad * pp.Cantidad as PrecioTotal
     FROM 
@@ -25,15 +31,20 @@ BEGIN
         Categorias c ON pc.IdCategoria = c.IdCategoria
     JOIN
         ProveedoresProductos prp ON prp.IdProducto = pp.IdProducto AND prp.IdProveedor = p.IdProveedor
+	JOIN
+		Proveedores pro ON pro.IdProveedor = p.IdProveedor
     WHERE FechaPedido >= @fechaInicio AND FechaPedido <= DATEADD(DAY, 1, @fechaFin)
         AND p.deletedat = '1111-11-11'
         AND pp.deletedat = '1111-11-11'
         AND pr.deletedat = '1111-11-11'
-        AND pc.deletedat = '1111-11-11';
+        AND pc.deletedat = '1111-11-11'
+		AND c.deletedat = '1111-11-11'
+		AND prp.deletedat = '1111-11-11'
+		AND pro.deletedat = '1111-11-11';
 END;
 
-DECLARE @fechaInicio DATETIME = '2025-03-05',  
-        @fechaFin DATETIME = '2025-03-06';  
+DECLARE @fechaInicio DATETIME = '2023-03-05',  
+        @fechaFin DATETIME = '2026-03-06';  
 
 EXEC filtrarPedidosPorFechas @fechaInicio, @fechaFin;
 
@@ -45,10 +56,16 @@ BEGIN
         p.IdPedido, 
         p.FechaPedido, 
         pp.IdProducto, 
-        prp.IdProveedor,
-        pr.Nombre,
+        pr.Nombre, 
+        pro.IdProveedor,
+		pro.Nombre as 'NombreProveedor',
+		pro.Correo,
+		pro.Telefono,
+		pro.Direccion,
+		pro.Pais,
+		c.IdCategoria,
+		c.Nombre as 'NombreCategoria',
 		prp.PrecioUnidad,
-        pc.IdCategoria,
         pp.Cantidad,
         prp.PrecioUnidad * pp.Cantidad as PrecioTotal
     FROM 
@@ -63,14 +80,19 @@ BEGIN
         Categorias c ON pc.IdCategoria = c.IdCategoria
     JOIN
         ProveedoresProductos prp ON prp.IdProducto = pp.IdProducto AND prp.IdProveedor = p.IdProveedor
+	JOIN
+		Proveedores pro ON pro.IdProveedor = p.IdProveedor
     WHERE pp.IdProducto = @idProducto
         AND p.deletedat = '1111-11-11'
         AND pp.deletedat = '1111-11-11'
         AND pr.deletedat = '1111-11-11'
-        AND pc.deletedat = '1111-11-11';
+        AND pc.deletedat = '1111-11-11'
+		AND c.deletedat = '1111-11-11'
+		AND prp.deletedat = '1111-11-11'
+		AND pro.deletedat = '1111-11-11';
 END;
 
-
+EXEC filtrarPedidosPorProducto 2
 
 CREATE OR ALTER PROCEDURE filtrarProductosPorCategoria
     @idCategoria INT
@@ -211,7 +233,9 @@ BEGIN
       AND pr.deletedat = '1111-11-11';
 END;
 
-
+Select * from Proveedores
+Select * from Categorias
+Exec pedidoCompleto
 
 CREATE OR ALTER PROCEDURE pedidoCompleto
 AS
@@ -220,11 +244,15 @@ BEGIN
         p.IdPedido, 
         p.FechaPedido, 
         pp.IdProducto, 
-        prp.IdProveedor,
         pr.Nombre, 
-        pc.IdCategoria,
-        prp.IdProveedor,
-        pc.IdCategoria,
+        pro.IdProveedor,
+		pro.Nombre as 'NombreProveedor',
+		pro.Correo,
+		pro.Telefono,
+		pro.Direccion,
+		pro.Pais,
+		c.IdCategoria,
+		c.Nombre as 'NombreCategoria',
 		prp.PrecioUnidad,
         pp.Cantidad,
         prp.PrecioUnidad * pp.Cantidad as PrecioTotal
@@ -240,13 +268,19 @@ BEGIN
         Categorias c ON pc.IdCategoria = c.IdCategoria
     JOIN
         ProveedoresProductos prp ON prp.IdProducto = pp.IdProducto AND prp.IdProveedor = p.IdProveedor
+	JOIN
+		Proveedores pro ON pro.IdProveedor = p.IdProveedor
     WHERE 
         p.deletedat = '1111-11-11'
         AND pp.deletedat = '1111-11-11'
         AND pr.deletedat = '1111-11-11'
-        AND pc.deletedat = '1111-11-11';
+        AND pc.deletedat = '1111-11-11'
+		AND c.deletedat = '1111-11-11'
+		AND prp.deletedat = '1111-11-11'
+		AND pro.deletedat = '1111-11-11';
 END;
 
+sELECT * FROM PEDIDOS
 
 CREATE OR ALTER PROCEDURE pedidoCompletoPorId
 	@IdPedido INT
@@ -256,11 +290,15 @@ BEGIN
         p.IdPedido, 
         p.FechaPedido, 
         pp.IdProducto, 
-        prp.IdProveedor,
         pr.Nombre, 
-        pc.IdCategoria,
-        prp.IdProveedor,
-        pc.IdCategoria,
+        pro.IdProveedor,
+		pro.Nombre as 'NombreProveedor',
+		pro.Correo,
+		pro.Telefono,
+		pro.Direccion,
+		pro.Pais,
+		c.IdCategoria,
+		c.Nombre as 'NombreCategoria',
 		prp.PrecioUnidad,
         pp.Cantidad,
         prp.PrecioUnidad * pp.Cantidad as PrecioTotal
@@ -276,13 +314,21 @@ BEGIN
         Categorias c ON pc.IdCategoria = c.IdCategoria
     JOIN
         ProveedoresProductos prp ON prp.IdProducto = pp.IdProducto AND prp.IdProveedor = p.IdProveedor
+	JOIN
+		Proveedores pro ON pro.IdProveedor = p.IdProveedor
     WHERE p.IdPedido = @IdPedido
         AND p.deletedat = '1111-11-11'
         AND pp.deletedat = '1111-11-11'
         AND pr.deletedat = '1111-11-11'
-        AND pc.deletedat = '1111-11-11';
+        AND pc.deletedat = '1111-11-11'
+		AND c.deletedat = '1111-11-11'
+		AND prp.deletedat = '1111-11-11'
+		AND pro.deletedat = '1111-11-11';
 END;
 
+Exec pedidoCompleto
+EXEC pedidoCompletoPorId 5
+sELECT * FROM pEDIDOSpRODUCTOS
 
 CREATE OR ALTER PROCEDURE ObtenerDetallesProducto
     @IdProducto INT
