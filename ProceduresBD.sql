@@ -98,16 +98,34 @@ CREATE OR ALTER PROCEDURE filtrarProductosPorCategoria
     @idCategoria INT
 AS
 BEGIN
-    SELECT p.*, pp.PrecioUnidad, pp.Stock, pp.IdProveedor
-    FROM Productos p
-    INNER JOIN ProductosCategorias pc ON p.IdProducto = pc.IdProducto
-	INNER JOIN ProveedoresProductos pp ON p.IdProducto = pp.IdProducto
+    SELECT 
+		p.*, 
+		pp.PrecioUnidad, 
+		pp.Stock, 
+		pro.IdProveedor,
+		pro.Nombre as 'NombreProveedor',
+		pro.Correo,
+		pro.Telefono,
+		pro.Direccion,
+		pro.Pais,
+		c.IdCategoria,
+		c.Nombre as 'NombreCategoria'
+    FROM 
+		Productos p
+    INNER JOIN 
+		ProductosCategorias pc ON p.IdProducto = pc.IdProducto
+	INNER JOIN 
+		ProveedoresProductos pp ON p.IdProducto = pp.IdProducto
+	INNER JOIN
+		Proveedores pro ON pro.Idproveedor = pp.Idproveedor
+	INNER JOIN
+		Categorias c ON c.IdCategoria = pc.IdCategoria
     WHERE pc.IdCategoria = @idCategoria
       AND p.deletedat = '1111-11-11'
       AND pc.deletedat = '1111-11-11';
 END;
 
---exec filtrarProductosPorCategoria 1
+exec filtrarProductosPorCategoria 1
 
 CREATE OR ALTER PROCEDURE filtrarProveedoresPorPais
     @Pais NVARCHAR(100)  
