@@ -121,3 +121,21 @@ BEGIN
         RETURN;
     END
 END;
+
+CREATE OR ALTER TRIGGER trg_AfterInsert_AfterUpdate_PedidosProductos
+ON PedidosProductos
+AFTER INSERT, UPDATE
+AS
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM inserted i
+		JOIN Pedidos p on p.IdPedido = i.IdPedido
+        JOIN ProveedoresProductos pp ON p.IdProveedor = pp.IdProveedor
+    )
+    BEGIN
+        RAISERROR ('No puedes insertar un producto en un pedido si el proveedor del pedido no ofrece ese producto.', 16, 1);
+        ROLLBACK TRANSACTION;
+        RETURN;
+    END
+END;

@@ -92,7 +92,11 @@ BEGIN
 		AND pro.deletedat = '1111-11-11';
 END;
 
-EXEC filtrarPedidosPorProducto 2
+EXEC filtrarPedidosPorProducto 4
+exec pedidoCompleto
+Exec pedidoCompletoPorId 27
+Select * from PedidosProductos
+select * from ProveedoresProductos
 
 CREATE OR ALTER PROCEDURE filtrarProductosPorCategoria
     @idCategoria INT
@@ -345,7 +349,7 @@ BEGIN
 END;
 
 Exec pedidoCompleto
-EXEC pedidoCompletoPorId 5
+EXEC pedidoCompletoPorId 16
 sELECT * FROM pEDIDOSpRODUCTOS
 
 CREATE OR ALTER PROCEDURE ObtenerDetallesProducto
