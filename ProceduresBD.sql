@@ -56,7 +56,7 @@ BEGIN
         p.IdPedido, 
         p.FechaPedido, 
         pp.IdProducto, 
-        pr.Nombre AS 'NombreProducto', 
+        pr.Nombre AS 'Nombre', 
         pro.IdProveedor,
         pro.Nombre AS 'NombreProveedor',
         pro.Correo,
