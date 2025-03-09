@@ -46,7 +46,7 @@ END;
 DECLARE @fechaInicio DATETIME = '2023-03-05',  
         @fechaFin DATETIME = '2026-03-06';  
 
-EXEC filtrarPedidosPorFechas @fechaInicio, @fechaFin;
+
 
 CREATE OR ALTER PROCEDURE filtrarPedidosPorProducto
     @idProducto INT
@@ -56,18 +56,18 @@ BEGIN
         p.IdPedido, 
         p.FechaPedido, 
         pp.IdProducto, 
-        pr.Nombre, 
+        pr.Nombre AS 'NombreProducto', 
         pro.IdProveedor,
-		pro.Nombre as 'NombreProveedor',
-		pro.Correo,
-		pro.Telefono,
-		pro.Direccion,
-		pro.Pais,
-		c.IdCategoria,
-		c.Nombre as 'NombreCategoria',
-		prp.PrecioUnidad,
+        pro.Nombre AS 'NombreProveedor',
+        pro.Correo,
+        pro.Telefono,
+        pro.Direccion,
+        pro.Pais,
+        c.IdCategoria,
+        c.Nombre AS 'NombreCategoria',
+        prp.PrecioUnidad,
         pp.Cantidad,
-        prp.PrecioUnidad * pp.Cantidad as PrecioTotal
+        prp.PrecioUnidad * pp.Cantidad AS PrecioTotal
     FROM 
         Pedidos p
     JOIN 
@@ -80,23 +80,24 @@ BEGIN
         Categorias c ON pc.IdCategoria = c.IdCategoria
     JOIN
         ProveedoresProductos prp ON prp.IdProducto = pp.IdProducto AND prp.IdProveedor = p.IdProveedor
-	JOIN
-		Proveedores pro ON pro.IdProveedor = p.IdProveedor
-    WHERE pp.IdProducto = @idProducto
-        AND p.deletedat = '1111-11-11'
-        AND pp.deletedat = '1111-11-11'
-        AND pr.deletedat = '1111-11-11'
-        AND pc.deletedat = '1111-11-11'
-		AND c.deletedat = '1111-11-11'
-		AND prp.deletedat = '1111-11-11'
-		AND pro.deletedat = '1111-11-11';
+    JOIN
+        Proveedores pro ON pro.IdProveedor = p.IdProveedor
+    WHERE 
+        p.IdPedido IN (
+            SELECT IdPedido 
+            FROM PedidosProductos 
+            WHERE IdProducto = @idProducto
+        )
+        AND p.DeletedAt = '1111-11-11'
+        AND pp.DeletedAt = '1111-11-11'
+        AND pr.DeletedAt = '1111-11-11'
+        AND pc.DeletedAt = '1111-11-11'
+        AND c.DeletedAt = '1111-11-11'
+        AND prp.DeletedAt = '1111-11-11'
+        AND pro.DeletedAt = '1111-11-11';
 END;
 
-EXEC filtrarPedidosPorProducto 4
-exec pedidoCompleto
-Exec pedidoCompletoPorId 27
-Select * from PedidosProductos
-select * from ProveedoresProductos
+
 
 CREATE OR ALTER PROCEDURE filtrarProductosPorCategoria
     @idCategoria INT
@@ -302,7 +303,7 @@ BEGIN
 		AND pro.deletedat = '1111-11-11';
 END;
 
-sELECT * FROM PEDIDOS
+
 
 CREATE OR ALTER PROCEDURE pedidoCompletoPorId
 	@IdPedido INT
@@ -348,9 +349,7 @@ BEGIN
 		AND pro.deletedat = '1111-11-11';
 END;
 
-Exec pedidoCompleto
-EXEC pedidoCompletoPorId 16
-sELECT * FROM pEDIDOSpRODUCTOS
+
 
 CREATE OR ALTER PROCEDURE ObtenerDetallesProducto
     @IdProducto INT

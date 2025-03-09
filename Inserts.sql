@@ -53,4 +53,5 @@ INSERT INTO PedidosProductos (IdPedido, IdProducto, Cantidad) VALUES
 (2, 2, 2),  -- Pedido 2 contiene 2 Lavadoras
 (3, 3, 10), -- Pedido 3 contiene 10 Muñecas Barbie
 (4, 4, 20), -- Pedido 4 contiene 20 Camisetas
+(5, 6, 10),
 (5, 5, 10);  -- Pedido 5 contiene 10 Balones
